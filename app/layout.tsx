@@ -1,5 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
+import Navbar from "@/components/navbar";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Sidebar } from "@/components/sidebar";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -35,7 +36,10 @@ export default function RootLayout({
             <div className="flex">
               <Sidebar />
               <div className="flex-1">
-                <ConvexClientProvider>{children}</ConvexClientProvider>
+                <Navbar />
+                <ConvexClientProvider>
+                  <main className="pl-2 md:pl-64 pt-14">{children}</main>
+                </ConvexClientProvider>
               </div>
             </div>
           </body>
