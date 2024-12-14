@@ -1,4 +1,5 @@
 import "./globals.css";
+import { Toaster } from "sonner";
 import type { Metadata } from "next";
 import Navbar from "@/components/navbar";
 import { ClerkProvider } from "@clerk/nextjs";
@@ -38,10 +39,11 @@ export default function RootLayout({
               <div className="flex-1">
                 <Navbar />
                 <ConvexClientProvider>
-                  <main className="pl-2 md:pl-64 pt-14">{children}</main>
+                  <main className="pl-5 md:pl-80 pt-16">{children}</main>
                 </ConvexClientProvider>
               </div>
             </div>
+            <Toaster position="bottom-right" />
           </body>
         </html>
       </SidebarProvider>

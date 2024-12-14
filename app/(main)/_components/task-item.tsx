@@ -19,9 +19,7 @@ const TaskItem = ({
   onClick,
   toggleSidebar,
   icon: Icon,
-  isFirst,
-  isLast,
-}: TaskItemProps & { isFirst?: boolean; isLast?: boolean }) => {
+}: TaskItemProps) => {
   const pathname = usePathname();
   const router = useRouter();
   const isActive = pathname === path;
@@ -42,11 +40,9 @@ const TaskItem = ({
     <div
       role="button"
       onClick={handleClick}
-      className={`group w-full min-h-[28px] flex items-center text-sm font-medium py-1.5 px-5 hover:bg-primary/5 cursor-pointer ${
-        isActive ? "bg-primary/5 text-primary" : "text-muted-foreground"
-      } ${!isSearch ? "border-y" : ""} 
-      ${isFirst ? "border-t-2" : ""} 
-      ${isLast ? "border-b-2" : ""}`}
+      className={`group w-full min-h-[28px] flex items-center text-sm font-medium py-1.5 px-5 hover:bg-primary/10 cursor-pointer ${
+        isActive ? "bg-primary/10 text-primary" : "text-muted-foreground"
+      }`}
     >
       <Icon className="size-5 shrink-0 mr-2" />
       <span className="truncate">{label}</span>
