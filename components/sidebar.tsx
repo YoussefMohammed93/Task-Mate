@@ -30,7 +30,7 @@ export const Sidebar = () => {
       <button className="md:hidden py-2.5 px-5" onClick={toggleSidebar}>
         <XIcon />
       </button>
-      <div className="block text-xl font-semibold absolute top-2.5 right-5 md:left-5">
+      <div className="block text-2xl font-semibold absolute top-2.5 right-5 md:left-5">
         Taskmate
       </div>
       <div className="pt-2 md:pt-12">

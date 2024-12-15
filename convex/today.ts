@@ -4,7 +4,15 @@ import { mutation, query } from "./_generated/server";
 export const get = query({
   args: {},
   handler: async (ctx) => {
-    return await ctx.db.query("tasks").collect();
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return [];
+    }
+
+    return await ctx.db
+      .query("tasks")
+      .filter((q) => q.eq(q.field("userId"), identity.subject))
+      .collect();
   },
 });
 
@@ -25,18 +33,24 @@ export const add = mutation({
     ),
   },
   handler: async (
-    { db },
+    ctx,
     { name, category, createdAt, isCompleted, description, subtasks }
   ) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Unauthenticated");
+    }
+
     const task = {
       name,
       category,
+      userId: identity.subject,
       createdAt,
       isCompleted,
       description,
       subtasks: subtasks || [],
     };
-    return await db.insert("tasks", task);
+    return await ctx.db.insert("tasks", task);
   },
 });
 
@@ -44,8 +58,18 @@ export const remove = mutation({
   args: {
     id: v.id("tasks"),
   },
-  handler: async ({ db }, { id }) => {
-    return await db.delete(id);
+  handler: async (ctx, { id }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Unauthenticated");
+    }
+
+    const task = await ctx.db.get(id);
+    if (!task || task.userId !== identity.subject) {
+      throw new Error("Unauthorized");
+    }
+
+    return await ctx.db.delete(id);
   },
 });
 
@@ -66,9 +90,19 @@ export const update = mutation({
     ),
   },
   handler: async (
-    { db },
+    ctx,
     { id, name, category, isCompleted, description, subtasks }
   ) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Unauthenticated");
+    }
+
+    const task = await ctx.db.get(id);
+    if (!task || task.userId !== identity.subject) {
+      throw new Error("Unauthorized");
+    }
+
     const updates: Partial<{
       name: string;
       category: string;
@@ -88,16 +122,25 @@ export const update = mutation({
       updates.createdAt = Date.now();
     }
 
-    return await db.patch(id, updates);
+    return await ctx.db.patch(id, updates);
   },
 });
 
 export const removeAll = mutation({
   args: {},
-  handler: async ({ db }) => {
-    const tasks = await db.query("tasks").collect();
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Unauthenticated");
+    }
+
+    const tasks = await ctx.db
+      .query("tasks")
+      .filter((q) => q.eq(q.field("userId"), identity.subject))
+      .collect();
+
     for (const task of tasks) {
-      await db.delete(task._id);
+      await ctx.db.delete(task._id);
     }
     return { success: true };
   },

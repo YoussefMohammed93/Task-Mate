@@ -2,11 +2,10 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import type { Metadata } from "next";
 import Navbar from "@/components/navbar";
-import { ClerkProvider } from "@clerk/nextjs";
 import { Sidebar } from "@/components/sidebar";
 import { Geist, Geist_Mono } from "next/font/google";
-import { ConvexClientProvider } from "./convex-client-provider";
 import { SidebarProvider } from "@/components/contexts/sidebar-context";
+import { ConvexClientProvider } from "@/components/providers/convex-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider>
+    <ConvexClientProvider>
       <SidebarProvider>
         <html lang="en" suppressHydrationWarning>
           <body
@@ -38,15 +37,13 @@ export default function RootLayout({
               <Sidebar />
               <div className="flex-1">
                 <Navbar />
-                <ConvexClientProvider>
-                  <main className="pl-5 md:pl-80 pt-16">{children}</main>
-                </ConvexClientProvider>
+                <main className="pl-5 md:pl-80 pt-16">{children}</main>
               </div>
             </div>
             <Toaster position="bottom-right" />
           </body>
         </html>
       </SidebarProvider>
-    </ClerkProvider>
+    </ConvexClientProvider>
   );
 }

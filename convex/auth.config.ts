@@ -2,7 +2,7 @@
 export default {
   providers: [
     {
-      domain: "https://your-issuer-url.clerk.accounts.dev/",
+      domain: "https://active-turkey-39.clerk.accounts.dev",
       applicationID: "convex",
     },
   ],

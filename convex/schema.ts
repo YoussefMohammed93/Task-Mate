@@ -5,6 +5,7 @@ export default defineSchema({
   tasks: defineTable({
     name: v.string(),
     category: v.string(),
+    userId: v.string(),
     createdAt: v.number(),
     isCompleted: v.boolean(),
     description: v.optional(v.string()),
@@ -16,5 +17,5 @@ export default defineSchema({
         })
       )
     ),
-  }),
+  }).index("by_user", ["userId"]),
 });
