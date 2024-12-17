@@ -15,13 +15,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Trash } from "lucide-react";
 import React, { useState } from "react";
 import { Textarea } from "../ui/textarea";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { AlertTriangle, Plus, Trash } from "lucide-react";
 
 export function TodayTaskDialog() {
   const addTaskMutation = useMutation(api.today.add);
@@ -30,6 +30,10 @@ export function TodayTaskDialog() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [description, setDescription] = useState<string>("");
   const [category, setCategory] = useState<string | undefined>(undefined);
+  const [useCustomCategory, setUseCustomCategory] = useState(false);
+  const [customCategoryName, setCustomCategoryName] = useState<string>("");
+  const [customCategoryColor, setCustomCategoryColor] =
+    useState<string>("#000000");
   const [subtasks, setSubtasks] = useState<
     { title: string; isCompleted: boolean }[]
   >([]);
@@ -48,7 +52,6 @@ export function TodayTaskDialog() {
     setSubtasks(newSubtasks);
   };
 
-  // Remove subtask at the given index
   const handleRemoveSubtask = (index: number) => {
     const newSubtasks = subtasks.filter(
       (_, subtaskIndex) => subtaskIndex !== index
@@ -62,7 +65,28 @@ export function TodayTaskDialog() {
       return;
     }
 
-    if (!category) {
+    for (const subtask of subtasks) {
+      if (!subtask.title.trim()) {
+        setError("Subtask titles cannot be empty.");
+        return;
+      }
+    }
+
+    if (taskName.length < 3) {
+      setError("Task name must be at least 3 letters long.");
+      return;
+    }
+
+    const finalCategory = useCustomCategory
+      ? `${customCategoryName} (${customCategoryColor})`
+      : category;
+
+    if (useCustomCategory && !customCategoryName.trim()) {
+      setError("Custom category name is required!");
+      return;
+    }
+
+    if (!finalCategory) {
       setError("Category is required!");
       return;
     }
@@ -71,7 +95,7 @@ export function TodayTaskDialog() {
       setError(null);
       await addTaskMutation({
         name: taskName,
-        category,
+        category: finalCategory,
         description,
         subtasks,
         isCompleted: false,
@@ -81,6 +105,9 @@ export function TodayTaskDialog() {
       setTaskName("");
       setDescription("");
       setCategory(undefined);
+      setUseCustomCategory(false);
+      setCustomCategoryName("");
+      setCustomCategoryColor("#000000");
       setSubtasks([]);
 
       toast.success("Task added successfully!");
@@ -103,7 +130,7 @@ export function TodayTaskDialog() {
         <DialogHeader>
           <DialogTitle>Add a New Task</DialogTitle>
         </DialogHeader>
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2 sm:gap-3">
           <Input
             placeholder="Task name"
             value={taskName}
@@ -115,8 +142,17 @@ export function TodayTaskDialog() {
             onChange={(e) => setDescription(e.target.value)}
             className="resize-none"
           />
-          <h3>Category</h3>
-          <Select onValueChange={(value) => setCategory(value)}>
+          <h3 className="font-medium">Category</h3>
+          <Select
+            onValueChange={(value) => {
+              if (value === "Custom") {
+                setUseCustomCategory(true);
+              } else {
+                setCategory(value);
+                setUseCustomCategory(false);
+              }
+            }}
+          >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select a category" />
             </SelectTrigger>
@@ -126,10 +162,38 @@ export function TodayTaskDialog() {
               <SelectItem value="Reading">Reading</SelectItem>
               <SelectItem value="Learning">Learning</SelectItem>
               <SelectItem value="Worship">Worship</SelectItem>
+              <SelectItem value="Custom">Custom</SelectItem>
             </SelectContent>
           </Select>
-
-          <h3>Subtasks</h3>
+          {useCustomCategory && (
+            <>
+              <h3 className="font-medium hidden sm:block">
+                Custom category name
+              </h3>
+              <div className="w-full flex flex-col md:flex-row gap-2 sm:gap-5">
+                <div className="md:w-3/4">
+                  <Input
+                    placeholder="Custom category name"
+                    value={customCategoryName}
+                    onChange={(e) => setCustomCategoryName(e.target.value)}
+                  />
+                </div>
+                <div className="md:w-1/4 flex items-center gap-2">
+                  <label htmlFor="color" className="font-medium">
+                    Category Color
+                  </label>
+                  <Input
+                    type="color"
+                    id="color"
+                    className="w-8 h-8 p-0 rounded-none shadow-none border-none cursor-pointer"
+                    value={customCategoryColor}
+                    onChange={(e) => setCustomCategoryColor(e.target.value)}
+                  />
+                </div>
+              </div>
+            </>
+          )}
+          <h3 className="font-medium">Subtasks</h3>
           {subtasks.map((subtask, index) => (
             <div key={index} className="flex gap-2 items-center">
               <Input
@@ -147,7 +211,11 @@ export function TodayTaskDialog() {
               </Button>
             </div>
           ))}
-          <Button variant="outline" onClick={handleAddSubtask}>
+          <Button
+            variant="secondary"
+            className="border border-gray-300"
+            onClick={handleAddSubtask}
+          >
             Add Subtask <Plus />
           </Button>
           {subtasks.length === 3 && (
@@ -155,7 +223,12 @@ export function TodayTaskDialog() {
               You can only add up to 3 subtasks.
             </p>
           )}
-          {error && <p className="text-destructive text-sm">{error}</p>}
+          {error && (
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="size-5 text-destructive" />
+              <span className="text-destructive text-sm">{error}</span>
+            </div>
+          )}
           <Button onClick={handleAddTask}>
             Add Task <Plus />
           </Button>

@@ -15,6 +15,13 @@ import {
   DialogContent,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useState } from "react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
@@ -43,6 +50,28 @@ export default function Today() {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const isLoading = tasks === undefined;
+  const [sortOption, setSortOption] = useState<
+    "newest" | "oldest" | "completed"
+  >("newest");
+
+  const sortedTasks = tasks
+    ? [...tasks]
+        .filter((task) => {
+          if (sortOption === "completed") {
+            return task.isCompleted;
+          }
+          return true;
+        })
+        .sort((a, b) => {
+          if (sortOption === "newest") {
+            return b.createdAt - a.createdAt;
+          }
+          if (sortOption === "oldest") {
+            return a.createdAt - b.createdAt;
+          }
+          return 0;
+        })
+    : [];
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -64,15 +93,15 @@ export default function Today() {
     const formattedDate = today.toLocaleDateString("en-GB", options);
 
     const [weekday, ...rest] = formattedDate.split(" ");
-    return `${weekday}, ${rest.join(" ")}`;
+    return `${weekday} ${rest.join(" ")}`;
   };
 
   const categoryColors: { [key: string]: string } = {
-    Work: "text-yellow-500",
-    Sport: "text-red-500",
-    Reading: "text-purple-500",
-    Learning: "text-green-500",
-    Worship: "text-blue-500",
+    Work: "orange",
+    Sport: "red",
+    Reading: "purple",
+    Learning: "green",
+    Worship: "gray",
   };
 
   const toggleCompletion = async (task: Task) => {
@@ -113,14 +142,16 @@ export default function Today() {
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 sm:gap-0 pr-5">
+      <div className="flex flex-col lg:flex-row sm:items-baseline justify-between gap-4 pr-5">
         <div className="flex items-center gap-3 sm:gap-8">
           <div className="flex items-center gap-5 sm:gap-8">
-            <h1 className="text-3xl sm:text-5xl font-bold">Today</h1>
+            <h1 className="font-mono text-3xl sm:text-4xl font-semibold">
+              Today
+            </h1>
             {isLoading ? (
               <Skeleton className="animate-pulse size-9 sm:size-12 rounded-md mt-2" />
             ) : (
-              <span className="flex items-center justify-center size-9 text-2xl sm:size-12 sm:text-3xl font-semibold border rounded-md mt-2">
+              <span className="flex items-center justify-center size-9 text-2xl sm:size-10 font-mono font-semibold border rounded-md mt-2">
                 {tasks?.length}
               </span>
             )}
@@ -128,6 +159,23 @@ export default function Today() {
         </div>
         <div className="font-medium text-muted-foreground">
           {getCurrentDate()}
+        </div>
+        <div>
+          <Select
+            value={sortOption}
+            onValueChange={(value) =>
+              setSortOption(value as "newest" | "oldest" | "completed")
+            }
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Sort By" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">Newest</SelectItem>
+              <SelectItem value="oldest">Oldest</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
       <div className="flex items-center gap-5 pt-8">
@@ -171,14 +219,17 @@ export default function Today() {
                 <div className="flex gap-3">
                   <Skeleton className="w-[80px] sm:w-[100px] h-6 rounded-md" />
                   <Skeleton className="w-[80px] sm:w-[100px] h-6 rounded-md" />
-                  <Skeleton className="w-[80px] sm:w-[100px] h-6 rounded-md" />
+                  <div className="flex gap-2">
+                    <Skeleton className="w-[20px] sm:w-[25px] h-6 rounded" />
+                    <Skeleton className="w-[80px] sm:w-[100px] h-6 rounded-md" />
+                  </div>
                 </div>
               </div>
               <Skeleton className="size-6 rounded-md hidden sm:block" />
             </div>
           ))
-        ) : tasks?.length > 0 ? (
-          tasks.map((task) => (
+        ) : sortedTasks?.length > 0 ? (
+          sortedTasks.map((task) => (
             <div
               key={task._id}
               role="button"
@@ -194,9 +245,9 @@ export default function Today() {
                     onClick={(e) => e.stopPropagation()}
                     onCheckedChange={() => toggleCompletion(task)}
                   />
-                  <h2 className="text-lg">{task.name}</h2>
+                  <h2 className="text-xl font-medium">{task.name}</h2>
                 </div>
-                <div className="flex items-center gap-5 mt-2">
+                <div className="flex items-center gap-5">
                   <div className="flex items-center gap-1 sm:gap-3 text-muted-foreground">
                     <CalendarClock className="size-5" />
                     <p>{formatDate(task.createdAt)}</p>
@@ -207,12 +258,28 @@ export default function Today() {
                     </p>
                   </div>
                   <div className="flex items-center gap-1 sm:gap-2">
-                    <Square
-                      className={`size-5 fill-current ${categoryColors[task.category] || "text-gray-500"}`}
-                    />
-                    <p className="text-sm sm:text-base font-medium text-zinc-600">
-                      {task.category}
-                    </p>
+                    {(() => {
+                      const customCategoryMatch = task.category.match(
+                        /^(.*) \((#[A-Fa-f0-9]{6})\)$/
+                      );
+                      const categoryName = customCategoryMatch
+                        ? customCategoryMatch[1]
+                        : task.category;
+                      const categoryColor = customCategoryMatch
+                        ? customCategoryMatch[2]
+                        : categoryColors[task.category] || "#6b7280";
+                      return (
+                        <>
+                          <Square
+                            className={`size-6 fill-[${categoryColor}] stroke-none`}
+                            style={{ fill: categoryColor }}
+                          />
+                          <p className="text-sm sm:text-base font-medium text-zinc-600">
+                            {categoryName}
+                          </p>
+                        </>
+                      );
+                    })()}
                   </div>
                 </div>
               </div>
@@ -220,7 +287,7 @@ export default function Today() {
             </div>
           ))
         ) : (
-          <p className="text-muted-foreground text-center text-lg mt-5">
+          <p className="text-muted-foreground text-lg">
             {"You don't have any tasks for today."}
           </p>
         )}
@@ -242,6 +309,12 @@ export default function Today() {
           </p>
           <DialogFooter>
             <Button
+              variant="outline"
+              onClick={() => setShowConfirmDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button
               variant="destructive"
               onClick={handleDeleteAllTasks}
               disabled={isDeleting}
@@ -253,12 +326,6 @@ export default function Today() {
               ) : (
                 "Yes, Delete All"
               )}
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => setShowConfirmDialog(false)}
-            >
-              Cancel
             </Button>
           </DialogFooter>
         </DialogContent>

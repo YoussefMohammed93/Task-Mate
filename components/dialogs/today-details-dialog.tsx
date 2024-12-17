@@ -12,15 +12,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import React, { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Id } from "@/convex/_generated/dataModel";
+import React, { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Edit, Loader, Plus, Trash } from "lucide-react";
+import { AlertTriangle, Edit, Loader, Plus, Trash } from "lucide-react";
 
 type Task = {
   _id: string;
@@ -37,7 +37,6 @@ const MAX_SUBTASKS = 3;
 const timeAgo = (timestamp: number) => {
   const now = Date.now();
   const diffInSeconds = Math.floor((now - timestamp) / 1000);
-
   const seconds = diffInSeconds;
   const minutes = Math.floor(diffInSeconds / 60);
   const hours = Math.floor(diffInSeconds / 3600);
@@ -67,18 +66,64 @@ export function TaskDetailsDialog({
   const [description, setDescription] = useState<string>(
     task?.description || ""
   );
-  const [category, setCategory] = useState<string>(task?.category || "");
-  const [subtasks, setSubtasks] = useState<
-    { title: string; isCompleted: boolean }[]
-  >(task?.subtasks || []);
+  const [category, setCategory] = useState<string>("");
+  const [useCustomCategory, setUseCustomCategory] = useState(false);
+  const [customCategoryName, setCustomCategoryName] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [customCategoryColor, setCustomCategoryColor] =
+    useState<string>("#000000");
+  const [subtasks, setSubtasks] = useState<
+    { title: string; isCompleted: boolean }[]
+  >(task?.subtasks || []);
+
+  useEffect(() => {
+    if (task?.category) {
+      const customCategoryMatch = task.category.match(
+        /^(.*) \((#[A-Fa-f0-9]{6})\)$/
+      );
+      if (customCategoryMatch) {
+        setUseCustomCategory(true);
+        setCustomCategoryName(customCategoryMatch[1]);
+        setCustomCategoryColor(customCategoryMatch[2]);
+      } else {
+        setCategory(task.category);
+        setUseCustomCategory(false);
+      }
+    }
+  }, [task]);
 
   const handleSave = async () => {
-    if (!taskName || !category) {
-      setError("Task name and category are required!");
+    if (!taskName.trim()) {
+      setError("Task name is required!");
       return;
+    }
+
+    if (taskName.trim().length < 3) {
+      setError("Task name must be at least 3 letters long.");
+      return;
+    }
+
+    const finalCategory = useCustomCategory
+      ? `${customCategoryName} (${customCategoryColor})`
+      : category;
+
+    if (useCustomCategory && !customCategoryName.trim()) {
+      setError("Custom category name is required!");
+      return;
+    }
+
+    if (!finalCategory) {
+      setError("Category is required!");
+      return;
+    }
+
+    for (const subtask of subtasks) {
+      if (!subtask.title.trim()) {
+        setError("Subtask titles cannot be empty.");
+        return;
+      }
     }
 
     if (!task) {
@@ -90,11 +135,11 @@ export function TaskDetailsDialog({
       setError(null);
       await updateTaskMutation({
         id: task._id as Id<"tasks">,
-        name: taskName,
-        category,
-        description,
+        name: taskName.trim(),
+        category: finalCategory,
+        description: description.trim(),
         subtasks: subtasks.map((subtask) => ({
-          title: subtask.title,
+          title: subtask.title.trim(),
           isCompleted: subtask.isCompleted,
         })),
       });
@@ -176,12 +221,19 @@ export function TaskDetailsDialog({
               onChange={(e) => setDescription(e.target.value)}
               className="resize-none"
             />
-            <h3>Category</h3>
+            <h3 className="font-medium">Category</h3>
             <Select
-              value={category}
-              onValueChange={(value) => setCategory(value)}
+              value={useCustomCategory ? "Custom" : category}
+              onValueChange={(value) => {
+                if (value === "Custom") {
+                  setUseCustomCategory(true);
+                } else {
+                  setCategory(value);
+                  setUseCustomCategory(false);
+                }
+              }}
             >
-              <SelectTrigger className="w-full">
+              <SelectTrigger>
                 <SelectValue placeholder="Select a category" />
               </SelectTrigger>
               <SelectContent>
@@ -190,9 +242,34 @@ export function TaskDetailsDialog({
                 <SelectItem value="Reading">Reading</SelectItem>
                 <SelectItem value="Learning">Learning</SelectItem>
                 <SelectItem value="Worship">Worship</SelectItem>
+                <SelectItem value="Custom">Custom</SelectItem>
               </SelectContent>
             </Select>
-            <h4>Subtasks</h4>
+            {useCustomCategory && (
+              <>
+                <div className="w-full flex items-center justify-between gap-2">
+                  <div className="w-full md:w-4/6">
+                    <Input
+                      placeholder="Custom category name"
+                      value={customCategoryName}
+                      onChange={(e) => setCustomCategoryName(e.target.value)}
+                    />
+                  </div>
+                  <div className="flex md:w-2/6 gap-2 items-center justify-end">
+                    <label className="font-medium hidden md:block">
+                      Category Color
+                    </label>
+                    <Input
+                      type="color"
+                      value={customCategoryColor}
+                      className="w-8 h-8 p-0 rounded-none shadow-none border-none cursor-pointer"
+                      onChange={(e) => setCustomCategoryColor(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+            <h3 className="font-medium">Subtasks</h3>
             {subtasks.map((subtask, index) => (
               <div key={index} className="flex gap-2 items-center">
                 <Input
@@ -219,7 +296,8 @@ export function TaskDetailsDialog({
               </div>
             ))}
             <Button
-              variant="outline"
+              variant="secondary"
+              className="border border-gray-300"
               onClick={handleAddSubtask}
               disabled={subtasks.length >= MAX_SUBTASKS}
             >
@@ -228,8 +306,12 @@ export function TaskDetailsDialog({
             <p className="text-muted-foreground text-sm">
               Last edited: {timeAgo(task.createdAt)}
             </p>
-            {error && <p className="text-destructive text-sm">{error}</p>}
-
+            {error && (
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="size-5 text-destructive" />
+                <span className="text-destructive text-sm">{error}</span>
+              </div>
+            )}
             <div className="flex items-center justify-end gap-2">
               <Button
                 variant="destructive"
@@ -246,7 +328,6 @@ export function TaskDetailsDialog({
           </div>
         </DialogContent>
       </Dialog>
-
       {showDeleteConfirm && (
         <DeleteConfirmDialog
           onConfirm={handleDelete}
@@ -273,7 +354,9 @@ function DeleteConfirmDialog({
         <DialogHeader>
           <DialogTitle>Confirm Deletion</DialogTitle>
         </DialogHeader>
-        <p>Are you sure you want to delete this task?</p>
+        <p className="text-muted-foreground">
+          Are you sure you want to delete this task?
+        </p>
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={onCancel}>
             Cancel
