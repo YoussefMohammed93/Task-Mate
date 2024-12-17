@@ -18,4 +18,19 @@ export default defineSchema({
       )
     ),
   }).index("by_user", ["userId"]),
+
+  pomodoro: defineTable({
+    name: v.string(),
+    userId: v.string(),
+    createdAt: v.number(),
+    studyTime: v.number(),
+    breakTime: v.number(),
+    startTime: v.number(),
+    timeLeft: v.number(),
+    isRunning: v.boolean(),
+    isBreak: v.boolean(),
+    pausedAt: v.optional(v.number()),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_and_status", ["userId", "isRunning"]),
 });

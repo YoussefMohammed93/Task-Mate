@@ -3,6 +3,7 @@
 import {
   CalendarDays,
   ChevronsRight,
+  Clock1,
   ListChecks,
   LogOut,
   NotepadText,
@@ -59,6 +60,12 @@ export const Sidebar = () => {
             label="Calendar"
             path="/calendar"
             icon={CalendarDays}
+            toggleSidebar={toggleSidebar}
+          />
+          <TaskItem
+            label="Pomodoro"
+            path="/pomodoro"
+            icon={Clock1}
             toggleSidebar={toggleSidebar}
           />
           <TaskItem

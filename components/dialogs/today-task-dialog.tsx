@@ -122,8 +122,8 @@ export function TodayTaskDialog() {
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
         <Button variant="outline">
-          <Plus className="mr-2 hidden sm:block" />
           Add new task
+          <Plus className="mr-2 hidden sm:block" />
         </Button>
       </DialogTrigger>
       <DialogContent>

@@ -13,6 +13,7 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as pomodoro from "../pomodoro.js";
 import type * as today from "../today.js";
 
 /**
@@ -24,6 +25,7 @@ import type * as today from "../today.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  pomodoro: typeof pomodoro;
   today: typeof today;
 }>;
 export declare const api: FilterApi<

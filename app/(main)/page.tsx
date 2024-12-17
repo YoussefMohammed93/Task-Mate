@@ -149,7 +149,7 @@ export default function Today() {
               Today
             </h1>
             {isLoading ? (
-              <Skeleton className="animate-pulse size-9 sm:size-12 rounded-md mt-2" />
+              <Skeleton className="animate-pulse size-9 sm:size-10 rounded-md mt-2" />
             ) : (
               <span className="flex items-center justify-center size-9 text-2xl sm:size-10 font-mono font-semibold border rounded-md mt-2">
                 {tasks?.length}
@@ -196,8 +196,8 @@ export default function Today() {
                 </span>
               ) : (
                 <>
-                  <Trash className="hidden sm:block" />
                   Delete all today tasks
+                  <Trash className="hidden sm:block" />
                 </>
               )}
             </Button>
