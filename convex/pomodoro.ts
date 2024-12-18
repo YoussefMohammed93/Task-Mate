@@ -111,3 +111,23 @@ export const stopPomodoroSession = mutation({
     }
   },
 });
+
+export const deletePomodoroSessionAfterCompletion = mutation({
+  args: { userId: v.string() },
+  handler: async (ctx, args) => {
+    const session = await ctx.db
+      .query("pomodoro")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .first();
+
+    if (session) {
+      const now = Date.now();
+      const elapsedTime = Math.floor((now - session.startTime) / 1000);
+      const totalTime = session.studyTime + session.breakTime;
+
+      if (elapsedTime >= totalTime) {
+        await ctx.db.delete(session._id);
+      }
+    }
+  },
+});

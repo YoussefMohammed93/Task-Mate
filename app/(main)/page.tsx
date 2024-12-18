@@ -141,7 +141,7 @@ export default function Today() {
   };
 
   return (
-    <div>
+    <div className="pl-5 md:pl-0">
       <div className="flex flex-col lg:flex-row sm:items-baseline justify-between gap-4 pr-5">
         <div className="flex items-center gap-3 sm:gap-8">
           <div className="flex items-center gap-5 sm:gap-8">
