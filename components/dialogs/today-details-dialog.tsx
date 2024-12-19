@@ -1,3 +1,5 @@
+"use client";
+
 import { toast } from "sonner";
 import {
   Dialog,
@@ -20,7 +22,7 @@ import { Id } from "@/convex/_generated/dataModel";
 import React, { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { AlertTriangle, Edit, Loader, Plus, Trash } from "lucide-react";
+import { AlertTriangle, Loader, Plus, Trash } from "lucide-react";
 
 type Task = {
   _id: string;
@@ -30,6 +32,8 @@ type Task = {
   isCompleted: boolean;
   description?: string;
   subtasks?: { title: string; isCompleted: boolean }[];
+  priority: "high" | "medium" | "low";
+  tags?: string[];
 };
 
 const MAX_SUBTASKS = 3;
@@ -69,14 +73,19 @@ export function TaskDetailsDialog({
   const [category, setCategory] = useState<string>("");
   const [useCustomCategory, setUseCustomCategory] = useState(false);
   const [customCategoryName, setCustomCategoryName] = useState<string>("");
-  const [error, setError] = useState<string | null>(null);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [customCategoryColor, setCustomCategoryColor] =
     useState<string>("#000000");
+  const [error, setError] = useState<string | null>(null);
   const [subtasks, setSubtasks] = useState<
     { title: string; isCompleted: boolean }[]
   >(task?.subtasks || []);
+  const [priority, setPriority] = useState<"high" | "medium" | "low">(
+    task?.priority || "medium"
+  );
+  const [tags, setTags] = useState<string[]>(task?.tags || []);
+  const [newTag, setNewTag] = useState<string>("");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     if (task?.category) {
@@ -92,6 +101,8 @@ export function TaskDetailsDialog({
         setUseCustomCategory(false);
       }
     }
+    if (task?.priority) setPriority(task.priority);
+    if (task?.tags) setTags(task.tags);
   }, [task]);
 
   const handleSave = async () => {
@@ -119,6 +130,11 @@ export function TaskDetailsDialog({
       return;
     }
 
+    if (!priority) {
+      setError("Priority is required!");
+      return;
+    }
+
     for (const subtask of subtasks) {
       if (!subtask.title.trim()) {
         setError("Subtask titles cannot be empty.");
@@ -126,15 +142,10 @@ export function TaskDetailsDialog({
       }
     }
 
-    if (!task) {
-      setError("No task to update.");
-      return;
-    }
-
     try {
       setError(null);
       await updateTaskMutation({
-        id: task._id as Id<"tasks">,
+        id: task!._id as Id<"tasks">,
         name: taskName.trim(),
         category: finalCategory,
         description: description.trim(),
@@ -142,6 +153,8 @@ export function TaskDetailsDialog({
           title: subtask.title.trim(),
           isCompleted: subtask.isCompleted,
         })),
+        priority,
+        tags,
       });
       toast.success("Task updated successfully!");
       onClose();
@@ -152,13 +165,9 @@ export function TaskDetailsDialog({
   };
 
   const handleDelete = async () => {
-    if (!task) {
-      toast.error("No task to delete.");
-      return;
-    }
-
+    if (!task) return;
+    setIsDeleting(true);
     try {
-      setIsDeleting(true);
       await deleteTaskMutation({ id: task._id as Id<"tasks"> });
       toast.success("Task deleted successfully!");
       onClose();
@@ -170,34 +179,41 @@ export function TaskDetailsDialog({
     }
   };
 
+  const handleAddTag = () => {
+    if (tags.length >= 3 || !newTag.trim()) {
+      toast.error("You can add up to 3 tags.");
+      return;
+    }
+    setTags([...tags, newTag.trim()]);
+    setNewTag("");
+  };
+
+  const handleRemoveTag = (index: number) => {
+    setTags(tags.filter((_, i) => i !== index));
+  };
+
   const handleAddSubtask = () => {
     if (subtasks.length >= MAX_SUBTASKS) {
-      setError(`A task can have a maximum of ${MAX_SUBTASKS} subtasks.`);
+      toast.error("You can add up to 3 subtasks.");
       return;
     }
     setSubtasks([...subtasks, { title: "", isCompleted: false }]);
-    setError(null);
   };
 
   const handleSubtaskChange = (index: number, value: string) => {
-    const updatedSubtasks = [...subtasks];
-    updatedSubtasks[index].title = value;
-    setSubtasks(updatedSubtasks);
+    const newSubtasks = [...subtasks];
+    newSubtasks[index].title = value;
+    setSubtasks(newSubtasks);
   };
 
   const handleSubtaskCompletionChange = (index: number) => {
-    const updatedSubtasks = [...subtasks];
-    updatedSubtasks[index].isCompleted = !updatedSubtasks[index].isCompleted;
-    setSubtasks(updatedSubtasks);
-
-    toast.success(
-      `Subtask ${index + 1} ${updatedSubtasks[index].isCompleted ? "completed" : "not completed"}!`
-    );
+    const newSubtasks = [...subtasks];
+    newSubtasks[index].isCompleted = !newSubtasks[index].isCompleted;
+    setSubtasks(newSubtasks);
   };
 
   const handleRemoveSubtask = (index: number) => {
-    const updatedSubtasks = subtasks.filter((_, i) => i !== index);
-    setSubtasks(updatedSubtasks);
+    setSubtasks(subtasks.filter((_, i) => i !== index));
   };
 
   if (!task) return null;
@@ -209,7 +225,7 @@ export function TaskDetailsDialog({
           <DialogHeader>
             <DialogTitle>Edit Task</DialogTitle>
           </DialogHeader>
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-4">
             <Input
               placeholder="Task name"
               value={taskName}
@@ -219,7 +235,6 @@ export function TaskDetailsDialog({
               placeholder="Task description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="resize-none"
             />
             <h3 className="font-medium">Category</h3>
             <Select
@@ -246,84 +261,132 @@ export function TaskDetailsDialog({
               </SelectContent>
             </Select>
             {useCustomCategory && (
-              <>
-                <div className="w-full flex items-center justify-between gap-2">
-                  <div className="w-full md:w-4/6">
-                    <Input
-                      placeholder="Custom category name"
-                      value={customCategoryName}
-                      onChange={(e) => setCustomCategoryName(e.target.value)}
-                    />
-                  </div>
-                  <div className="flex md:w-2/6 gap-2 items-center justify-end">
-                    <label className="font-medium hidden md:block">
-                      Category Color
-                    </label>
-                    <Input
-                      type="color"
-                      value={customCategoryColor}
-                      className="w-8 h-8 p-0 rounded-none shadow-none border-none cursor-pointer"
-                      onChange={(e) => setCustomCategoryColor(e.target.value)}
-                    />
-                  </div>
-                </div>
-              </>
-            )}
-            <h3 className="font-medium">Subtasks</h3>
-            {subtasks.map((subtask, index) => (
-              <div key={index} className="flex gap-2 items-center">
-                <Input
-                  placeholder={`Subtask ${index + 1}`}
-                  value={subtask.title}
-                  onChange={(e) => handleSubtaskChange(index, e.target.value)}
-                />
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    id={`subtask-checkbox-${index}`}
-                    checked={subtask.isCompleted}
-                    className="size-8"
-                    onCheckedChange={() => handleSubtaskCompletionChange(index)}
+              <div className="w-full flex flex-col md:flex-row gap-2 sm:gap-5">
+                <div className="md:w-3/4">
+                  <Input
+                    placeholder="Custom category name"
+                    value={customCategoryName}
+                    onChange={(e) => setCustomCategoryName(e.target.value)}
                   />
                 </div>
-                <Button
-                  variant="destructive"
-                  className="px-4"
-                  size="icon"
-                  onClick={() => handleRemoveSubtask(index)}
-                >
-                  <Trash />
-                </Button>
+                <div className="md:w-1/4 flex items-center gap-2">
+                  <label htmlFor="color" className="font-medium">
+                    Category Color
+                  </label>
+                  <Input
+                    id="color"
+                    type="color"
+                    className="w-8 h-8 p-0 rounded-none shadow-none border-none cursor-pointer"
+                    value={customCategoryColor}
+                    onChange={(e) => setCustomCategoryColor(e.target.value)}
+                  />
+                </div>
               </div>
-            ))}
+            )}
+            <div className="w-full flex items-center gap-2">
+              <div className="w-1/4">
+                <h3 className="font-medium mb-1">Priority</h3>
+                <Select
+                  value={priority}
+                  onValueChange={(value) =>
+                    setPriority(value as "high" | "medium" | "low")
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select priority" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="w-3/4">
+                <h3 className="font-medium mb-1">Tags</h3>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Add a tag"
+                    value={newTag}
+                    onChange={(e) => setNewTag(e.target.value)}
+                  />
+                  <Button
+                    onClick={handleAddTag}
+                    disabled={tags.length >= 3 || !newTag.trim()}
+                  >
+                    Add Tag
+                  </Button>
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {tags.map((tag, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-3 bg-gray-200/70 px-3 py-1 rounded-full text-sm"
+                >
+                  <p>{tag}</p>
+                  <button
+                    onClick={() => handleRemoveTag(index)}
+                    className="text-destructive"
+                  >
+                    <Trash size={18} />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <h3 className="font-medium">Subtasks</h3>
+            <div className="flex flex-col sm:flex-row gap-2">
+              {subtasks.map((subtask, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <Input
+                    placeholder={`Subtask ${index + 1}`}
+                    value={subtask.title}
+                    onChange={(e) => handleSubtaskChange(index, e.target.value)}
+                  />
+                  <Checkbox
+                    checked={subtask.isCompleted}
+                    className="size-7 rounded-none"
+                    onCheckedChange={() => handleSubtaskCompletionChange(index)}
+                  />
+                  <Button
+                    variant="destructive"
+                    className="px-3"
+                    onClick={() => handleRemoveSubtask(index)}
+                  >
+                    <Trash />
+                  </Button>
+                </div>
+              ))}
+            </div>
             <Button
-              variant="secondary"
-              className="border border-gray-300"
               onClick={handleAddSubtask}
               disabled={subtasks.length >= MAX_SUBTASKS}
             >
               Add Subtask <Plus />
             </Button>
-            <p className="text-muted-foreground text-sm">
-              Last edited: {timeAgo(task.createdAt)}
+            <p className="text-sm text-muted-foreground">
+              Last updated: {timeAgo(task.createdAt)}
             </p>
             {error && (
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="size-5 text-destructive" />
-                <span className="text-destructive text-sm">{error}</span>
+              <div className="flex items-center text-destructive gap-2">
+                <AlertTriangle className="text-destructive" />
+                <span>{error}</span>
               </div>
             )}
-            <div className="flex items-center justify-end gap-2">
+            <div className="flex justify-end gap-2">
               <Button
                 variant="destructive"
                 onClick={() => setShowDeleteConfirm(true)}
-                className="w-full"
                 disabled={isDeleting}
               >
-                Delete Task <Trash />
+                {isDeleting ? (
+                  <Loader className="animate-spin" />
+                ) : (
+                  "Delete Task"
+                )}
               </Button>
-              <Button onClick={handleSave} className="w-full">
-                Save Changes <Edit />
-              </Button>
+              <Button onClick={handleSave}>Save Changes</Button>
             </div>
           </div>
         </DialogContent>

@@ -40,6 +40,8 @@ type Task = {
   isCompleted: boolean;
   description?: string;
   _creationTime: number;
+  priority: "high" | "medium" | "low";
+  tags?: string[];
 };
 
 export default function Today() {
@@ -51,15 +53,16 @@ export default function Today() {
   const [isDeleting, setIsDeleting] = useState(false);
   const isLoading = tasks === undefined;
   const [sortOption, setSortOption] = useState<
-    "newest" | "oldest" | "completed"
+    "newest" | "oldest" | "completed" | "high" | "medium" | "low"
   >("newest");
 
   const sortedTasks = tasks
     ? [...tasks]
         .filter((task) => {
-          if (sortOption === "completed") {
-            return task.isCompleted;
-          }
+          if (sortOption === "completed") return task.isCompleted;
+          if (sortOption === "high") return task.priority === "high";
+          if (sortOption === "medium") return task.priority === "medium";
+          if (sortOption === "low") return task.priority === "low";
           return true;
         })
         .sort((a, b) => {
@@ -130,7 +133,7 @@ export default function Today() {
 
     try {
       await removeAllTasksMutation();
-      toast.success("All today tasks deleted successfully!");
+      toast.success("All tasks deleted successfully!");
       setShowConfirmDialog(false);
     } catch (error) {
       toast.error("Failed to delete tasks, Please try again.");
@@ -146,7 +149,7 @@ export default function Today() {
         <div className="flex items-center gap-3 sm:gap-8">
           <div className="flex items-center gap-5 sm:gap-8">
             <h1 className="font-mono text-3xl sm:text-4xl font-semibold">
-              Today
+              Tasks
             </h1>
             {isLoading ? (
               <Skeleton className="animate-pulse size-9 sm:size-10 rounded-md mt-2" />
@@ -164,7 +167,15 @@ export default function Today() {
           <Select
             value={sortOption}
             onValueChange={(value) =>
-              setSortOption(value as "newest" | "oldest" | "completed")
+              setSortOption(
+                value as
+                  | "newest"
+                  | "oldest"
+                  | "completed"
+                  | "high"
+                  | "medium"
+                  | "low"
+              )
             }
           >
             <SelectTrigger className="w-[180px]">
@@ -174,6 +185,9 @@ export default function Today() {
               <SelectItem value="newest">Newest</SelectItem>
               <SelectItem value="oldest">Oldest</SelectItem>
               <SelectItem value="completed">Completed</SelectItem>
+              <SelectItem value="low">Low Priority</SelectItem>
+              <SelectItem value="medium">Medium Priority</SelectItem>
+              <SelectItem value="high">High Priority</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -196,7 +210,7 @@ export default function Today() {
                 </span>
               ) : (
                 <>
-                  Delete all today tasks
+                  Delete all tasks
                   <Trash className="hidden sm:block" />
                 </>
               )}
@@ -209,23 +223,27 @@ export default function Today() {
           Array.from({ length: 5 }).map((_, index) => (
             <div
               key={index}
-              className="animate-pulse border-b p-3 flex items-center justify-between"
+              className="animate-pulse border-b px-3 py-2 flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
             >
               <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-3">
-                  <Skeleton className="size-7 rounded-md" />
-                  <Skeleton className="w-24 h-6 rounded-md" />
+                  <Skeleton className="h-6 w-6 rounded" />
+                  <Skeleton className="h-6 w-32 md:w-48 rounded" />
+                  <Skeleton className="h-6 w-20 md:w-24 rounded-md" />
                 </div>
-                <div className="flex gap-3">
-                  <Skeleton className="w-[80px] sm:w-[100px] h-6 rounded-md" />
-                  <Skeleton className="w-[80px] sm:w-[100px] h-6 rounded-md" />
-                  <div className="flex gap-2">
-                    <Skeleton className="w-[20px] sm:w-[25px] h-6 rounded" />
-                    <Skeleton className="w-[80px] sm:w-[100px] h-6 rounded-md" />
+                <div className="md:flex gap-2">
+                  <div className="flex flex-col md:flex-row md:items-center gap-3">
+                    <Skeleton className="h-5 w-32 md:w-40 rounded-md" />
+                    <Skeleton className="h-5 w-24 md:w-32 rounded-md" />
+                  </div>
+                  <div className="flex gap-2 mt-3 md:mt-0">
+                    <Skeleton className="h-5 w-16 md:w-14 rounded-full" />
+                    <Skeleton className="h-5 w-16 md:w-14 rounded-full" />
+                    <Skeleton className="h-5 w-16 md:w-14 rounded-full" />
                   </div>
                 </div>
               </div>
-              <Skeleton className="size-6 rounded-md hidden sm:block" />
+              <Skeleton className="h-6 w-6 rounded-md hidden md:block" />
             </div>
           ))
         ) : sortedTasks?.length > 0 ? (
@@ -233,62 +251,96 @@ export default function Today() {
             <div
               key={task._id}
               role="button"
-              className="border-b px-3 py-2 flex items-center justify-between hover:bg-[#aeaeae17]"
+              className="border-b px-3 py-3 flex items-center justify-between hover:bg-[#aeaeae17]"
               onClick={() => setSelectedTask(task)}
             >
-              <div className="flex flex-col">
+              <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-3">
                   <Checkbox
                     id={`task-${task._id}`}
                     checked={task.isCompleted}
-                    className="size-6"
+                    className="size-6 rounded-none"
                     onClick={(e) => e.stopPropagation()}
                     onCheckedChange={() => toggleCompletion(task)}
                   />
                   <h2 className="text-xl font-medium">{task.name}</h2>
+                  <p
+                    className={`text-sm ml-2 px-5 py-1 rounded-full ${
+                      task.priority === "high"
+                        ? "bg-red-100 text-red-950"
+                        : task.priority === "medium"
+                          ? "bg-orange-100 text-orange-950"
+                          : "bg-green-100 text-green-950"
+                    }`}
+                  >
+                    {task.priority.charAt(0).toUpperCase() +
+                      task.priority.slice(1)}{" "}
+                    priority
+                  </p>
                 </div>
-                <div className="flex items-center gap-5">
+                <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-5">
                   <div className="flex items-center gap-1 sm:gap-3 text-muted-foreground">
                     <CalendarClock className="size-5" />
                     <p>{formatDate(task.createdAt)}</p>
                   </div>
-                  <div className="flex items-center gap-1 sm:gap-2">
-                    <p className="text-sm sm:text-base font-medium text-muted-foreground">
-                      {task.subtasks?.length || 0} Subtasks
-                    </p>
+                  <div className="flex gap-3">
+                    <div className="flex items-center gap-1 sm:gap-2">
+                      <p className="text-sm sm:text-base font-medium text-muted-foreground">
+                        {task.subtasks?.length || 0} Subtasks
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1 sm:gap-2">
+                      {(() => {
+                        const customCategoryMatch = task.category.match(
+                          /^(.*) \((#[A-Fa-f0-9]{6})\)$/
+                        );
+                        const categoryName = customCategoryMatch
+                          ? customCategoryMatch[1]
+                          : task.category;
+                        const categoryColor = customCategoryMatch
+                          ? customCategoryMatch[2]
+                          : categoryColors[task.category] || "#6b7280";
+                        return (
+                          <>
+                            <Square
+                              className={`size-6 fill-[${categoryColor}] stroke-none`}
+                              style={{ fill: categoryColor }}
+                            />
+                            <p className="text-sm sm:text-base font-medium text-zinc-600">
+                              {categoryName}
+                            </p>
+                          </>
+                        );
+                      })()}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1 sm:gap-2">
-                    {(() => {
-                      const customCategoryMatch = task.category.match(
-                        /^(.*) \((#[A-Fa-f0-9]{6})\)$/
-                      );
-                      const categoryName = customCategoryMatch
-                        ? customCategoryMatch[1]
-                        : task.category;
-                      const categoryColor = customCategoryMatch
-                        ? customCategoryMatch[2]
-                        : categoryColors[task.category] || "#6b7280";
+                  <div className="relative right-1">
+                    {task.tags?.map((tag, index) => {
+                      const bgColors = [
+                        "bg-blue-200/90 text-blue-900",
+                        "bg-green-200/90 text-green-900",
+                        "bg-orange-200/90 text-orange-900",
+                      ];
+                      const bgColor = bgColors[index % bgColors.length];
+
                       return (
-                        <>
-                          <Square
-                            className={`size-6 fill-[${categoryColor}] stroke-none`}
-                            style={{ fill: categoryColor }}
-                          />
-                          <p className="text-sm sm:text-base font-medium text-zinc-600">
-                            {categoryName}
-                          </p>
-                        </>
+                        <span
+                          key={index}
+                          className={`inline-block text-xs mx-1 px-4 py-1 rounded-full ${bgColor}`}
+                        >
+                          {tag}
+                        </span>
                       );
-                    })()}
+                    })}
                   </div>
                 </div>
               </div>
-              <ChevronRight className="hidden sm:block size-6" />
+              <ChevronRight className="block size-6" />
             </div>
           ))
         ) : (
           <p className="text-muted-foreground text-lg">
-            {"You don't have any tasks for today."}
+            {"You don't have any tasks."}
           </p>
         )}
       </div>
@@ -301,7 +353,7 @@ export default function Today() {
       <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete all today tasks</DialogTitle>
+            <DialogTitle>Delete all tasks</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
             Are you sure you want to delete all tasks? This action cannot be

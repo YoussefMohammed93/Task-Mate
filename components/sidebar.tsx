@@ -42,10 +42,9 @@ export const Sidebar = () => {
           isSearch
           toggleSidebar={toggleSidebar}
         />
-        <div className="pl-5 pt-5 pb-2 font-medium">Tasks</div>
         <div>
           <TaskItem
-            label="Today"
+            label="Tasks"
             path="/"
             icon={ListChecks}
             toggleSidebar={toggleSidebar}

@@ -38,6 +38,25 @@ export function TodayTaskDialog() {
     { title: string; isCompleted: boolean }[]
   >([]);
 
+  const [priority, setPriority] = useState<"high" | "medium" | "low" | null>(
+    null
+  );
+  const [tags, setTags] = useState<string[]>([]);
+  const [newTag, setNewTag] = useState<string>("");
+
+  const handleAddTag = () => {
+    if (tags.length < 3 && newTag.trim() !== "") {
+      setTags([...tags, newTag.trim()]);
+      setNewTag("");
+    } else {
+      toast.error("You can only add up to 3 tags.");
+    }
+  };
+
+  const handleRemoveTag = (index: number) => {
+    setTags(tags.filter((_, tagIndex) => tagIndex !== index));
+  };
+
   const handleAddSubtask = () => {
     if (subtasks.length < 3) {
       setSubtasks([...subtasks, { title: "", isCompleted: false }]);
@@ -91,6 +110,11 @@ export function TodayTaskDialog() {
       return;
     }
 
+    if (!priority) {
+      setError("Priority is required!");
+      return;
+    }
+
     try {
       setError(null);
       await addTaskMutation({
@@ -100,6 +124,8 @@ export function TodayTaskDialog() {
         subtasks,
         isCompleted: false,
         createdAt: Date.now(),
+        priority,
+        tags,
       });
 
       setTaskName("");
@@ -109,6 +135,8 @@ export function TodayTaskDialog() {
       setCustomCategoryName("");
       setCustomCategoryColor("#000000");
       setSubtasks([]);
+      setPriority(null);
+      setTags([]);
 
       toast.success("Task added successfully!");
       setIsDialogOpen(false);
@@ -167,9 +195,6 @@ export function TodayTaskDialog() {
           </Select>
           {useCustomCategory && (
             <>
-              <h3 className="font-medium hidden sm:block">
-                Custom category name
-              </h3>
               <div className="w-full flex flex-col md:flex-row gap-2 sm:gap-5">
                 <div className="md:w-3/4">
                   <Input
@@ -193,24 +218,77 @@ export function TodayTaskDialog() {
               </div>
             </>
           )}
-          <h3 className="font-medium">Subtasks</h3>
-          {subtasks.map((subtask, index) => (
-            <div key={index} className="flex gap-2 items-center">
-              <Input
-                placeholder={`Subtask ${index + 1}`}
-                value={subtask.title}
-                onChange={(e) => handleSubtaskChange(index, e.target.value)}
-              />
-              <Button
-                variant="destructive"
-                className="px-4"
-                size="icon"
-                onClick={() => handleRemoveSubtask(index)}
+          <div className="w-full flex gap-2">
+            <div className="w-1/4">
+              <h3 className="font-medium mb-1">Priority</h3>
+              <Select
+                onValueChange={(value) =>
+                  setPriority(value as "high" | "medium" | "low")
+                }
               >
-                <Trash size={16} />
-              </Button>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select priority" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="low">Low</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-          ))}
+            <div className="w-3/4">
+              <h3 className="font-medium mb-1">Tags</h3>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Add a tag"
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                />
+                <Button
+                  onClick={handleAddTag}
+                  disabled={tags.length >= 3 || !newTag.trim()}
+                >
+                  Add Tag
+                </Button>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {tags.map((tag, index) => (
+              <div
+                key={index}
+                className="flex items-center gap-3 bg-gray-200/70 px-3 py-1 rounded-full text-sm"
+              >
+                <p>{tag}</p>
+                <button
+                  onClick={() => handleRemoveTag(index)}
+                  className="text-destructive"
+                >
+                  <Trash size={18} />
+                </button>
+              </div>
+            ))}
+          </div>
+          <h3 className="font-medium">Subtasks</h3>
+          <div className="flex flex-col sm:flex-row gap-2">
+            {subtasks.map((subtask, index) => (
+              <div key={index} className="w-full flex gap-2 items-center">
+                <Input
+                  placeholder={`Subtask ${index + 1}`}
+                  value={subtask.title}
+                  onChange={(e) => handleSubtaskChange(index, e.target.value)}
+                />
+                <Button
+                  variant="destructive"
+                  className="px-4"
+                  size="icon"
+                  onClick={() => handleRemoveSubtask(index)}
+                >
+                  <Trash size={16} />
+                </Button>
+              </div>
+            ))}
+          </div>
           <Button
             variant="secondary"
             className="border border-gray-300"
@@ -218,11 +296,6 @@ export function TodayTaskDialog() {
           >
             Add Subtask <Plus />
           </Button>
-          {subtasks.length === 3 && (
-            <p className="text-sm text-muted-foreground">
-              You can only add up to 3 subtasks.
-            </p>
-          )}
           {error && (
             <div className="flex items-center gap-2">
               <AlertTriangle className="size-5 text-destructive" />

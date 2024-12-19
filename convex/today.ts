@@ -31,10 +31,21 @@ export const add = mutation({
         })
       )
     ),
+    priority: v.union(v.literal("high"), v.literal("medium"), v.literal("low")),
+    tags: v.optional(v.array(v.string())),
   },
   handler: async (
     ctx,
-    { name, category, createdAt, isCompleted, description, subtasks }
+    {
+      name,
+      category,
+      createdAt,
+      isCompleted,
+      description,
+      subtasks,
+      priority,
+      tags,
+    }
   ) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
@@ -49,6 +60,8 @@ export const add = mutation({
       isCompleted,
       description,
       subtasks: subtasks || [],
+      priority,
+      tags: tags || [],
     };
     return await ctx.db.insert("tasks", task);
   },
@@ -88,10 +101,14 @@ export const update = mutation({
         })
       )
     ),
+    priority: v.optional(
+      v.union(v.literal("high"), v.literal("medium"), v.literal("low"))
+    ),
+    tags: v.optional(v.array(v.string())),
   },
   handler: async (
     ctx,
-    { id, name, category, isCompleted, description, subtasks }
+    { id, name, category, isCompleted, description, subtasks, priority, tags }
   ) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
@@ -109,6 +126,8 @@ export const update = mutation({
       isCompleted: boolean;
       description?: string;
       subtasks?: { title: string; isCompleted: boolean }[];
+      priority: "high" | "medium" | "low";
+      tags: string[];
       createdAt: number;
     }> = {};
 
@@ -117,6 +136,8 @@ export const update = mutation({
     if (isCompleted !== undefined) updates.isCompleted = isCompleted;
     if (description !== undefined) updates.description = description;
     if (subtasks !== undefined) updates.subtasks = subtasks;
+    if (priority !== undefined) updates.priority = priority;
+    if (tags !== undefined) updates.tags = tags;
 
     if (name || category || description) {
       updates.createdAt = Date.now();
