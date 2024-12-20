@@ -14,6 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Input } from "@/components/ui/input";
@@ -22,7 +24,17 @@ import { Id } from "@/convex/_generated/dataModel";
 import React, { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { AlertTriangle, Loader, Plus, Trash } from "lucide-react";
+import { AlertTriangle, CalendarDays, Loader, Plus, Trash } from "lucide-react";
+
+const formatCairoTime = (date: Date) =>
+  new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Africa/Cairo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
 
 type Task = {
   _id: string;
@@ -34,6 +46,8 @@ type Task = {
   subtasks?: { title: string; isCompleted: boolean }[];
   priority: "high" | "medium" | "low";
   tags?: string[];
+  dueDate?: string;
+  dueTime?: string;
 };
 
 const MAX_SUBTASKS = 3;
@@ -86,6 +100,14 @@ export function TaskDetailsDialog({
   const [newTag, setNewTag] = useState<string>("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [dueDateDialogOpen, setDueDateDialogOpen] = useState(false);
+  const [dueDate, setDueDate] = useState<Date | null>(
+    task?.dueDate ? new Date(task.dueDate) : null
+  );
+  const [dueTime, setDueTime] = useState<string>(task?.dueTime || "12:00");
+  const finalCategory = useCustomCategory
+    ? `${customCategoryName} (${customCategoryColor})`
+    : category;
 
   useEffect(() => {
     if (task?.category) {
@@ -105,20 +127,30 @@ export function TaskDetailsDialog({
     if (task?.tags) setTags(task.tags);
   }, [task]);
 
-  const handleSave = async () => {
-    if (!taskName.trim()) {
-      setError("Task name is required!");
+  const handleSaveDueDate = () => {
+    if (!dueDate) {
+      toast.error("Please select a due date!");
       return;
     }
 
-    if (taskName.trim().length < 3) {
+    const [hours, minutes] = dueTime.split(":").map(Number);
+    const combinedDueDate = new Date(dueDate);
+    combinedDueDate.setHours(hours);
+    combinedDueDate.setMinutes(minutes);
+
+    const cairoTime = formatCairoTime(combinedDueDate);
+
+    toast.success(`Due date updated to: ${cairoTime}`);
+    setDueDateDialogOpen(false);
+  };
+
+  const handleSaveChanges = async () => {
+    if (!task) return;
+
+    if (taskName.length < 3) {
       setError("Task name must be at least 3 letters long.");
       return;
     }
-
-    const finalCategory = useCustomCategory
-      ? `${customCategoryName} (${customCategoryColor})`
-      : category;
 
     if (useCustomCategory && !customCategoryName.trim()) {
       setError("Custom category name is required!");
@@ -135,6 +167,11 @@ export function TaskDetailsDialog({
       return;
     }
 
+    if (!dueDate) {
+      setError("Due date is required!");
+      return;
+    }
+
     for (const subtask of subtasks) {
       if (!subtask.title.trim()) {
         setError("Subtask titles cannot be empty.");
@@ -143,24 +180,28 @@ export function TaskDetailsDialog({
     }
 
     try {
-      setError(null);
+      const isoDueDate = dueDate ? new Date(dueDate).toISOString() : null;
+
       await updateTaskMutation({
-        id: task!._id as Id<"tasks">,
-        name: taskName.trim(),
-        category: finalCategory,
-        description: description.trim(),
+        id: task._id as Id<"tasks">,
+        name: taskName,
+        description,
+        dueDate: isoDueDate || undefined,
+        dueTime,
+        tags,
         subtasks: subtasks.map((subtask) => ({
           title: subtask.title.trim(),
           isCompleted: subtask.isCompleted,
         })),
         priority,
-        tags,
+        category: finalCategory,
       });
+
       toast.success("Task updated successfully!");
       onClose();
     } catch (error) {
-      console.error(error);
-      setError("Failed to update task.");
+      console.error("Error updating task:", error);
+      toast.error("Failed to update task.");
     }
   };
 
@@ -172,7 +213,7 @@ export function TaskDetailsDialog({
       toast.success("Task deleted successfully!");
       onClose();
     } catch (error) {
-      console.error(error);
+      console.error("Error deleting task:", error);
       toast.error("Failed to delete task.");
     } finally {
       setIsDeleting(false);
@@ -236,6 +277,32 @@ export function TaskDetailsDialog({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
+            <Button
+              variant="outline"
+              onClick={() => setDueDateDialogOpen(true)}
+            >
+              Set Due Date
+              <CalendarDays />
+            </Button>
+            {dueDate && (
+              <p className="mt-2 text-muted-foreground">
+                <span>Due Date : </span>
+                {dueDate &&
+                  `${new Intl.DateTimeFormat("en-GB", {
+                    timeZone: "Africa/Cairo",
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                  }).format(new Date(dueDate))} at ${new Date(
+                    `${new Date(dueDate).toDateString()} ${dueTime}`
+                  ).toLocaleTimeString("en-US", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: true,
+                    timeZone: "Africa/Cairo",
+                  })}`}
+              </p>
+            )}
             <h3 className="font-medium">Category</h3>
             <Select
               value={useCustomCategory ? "Custom" : category}
@@ -386,7 +453,7 @@ export function TaskDetailsDialog({
                   "Delete Task"
                 )}
               </Button>
-              <Button onClick={handleSave}>Save Changes</Button>
+              <Button onClick={handleSaveChanges}>Save Changes</Button>
             </div>
           </div>
         </DialogContent>
@@ -398,6 +465,38 @@ export function TaskDetailsDialog({
           isDeleting={isDeleting}
         />
       )}
+      <Dialog open={dueDateDialogOpen} onOpenChange={setDueDateDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Set Due Date</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4 items-center">
+            <Calendar
+              onChange={(value) => setDueDate(value as Date)}
+              value={dueDate}
+              minDate={new Date()}
+            />
+            <div className="flex items-center gap-2">
+              <label htmlFor="time">Time:</label>
+              <Input
+                id="time"
+                type="time"
+                value={dueTime}
+                onChange={(e) => setDueTime(e.target.value)}
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setDueDateDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleSaveDueDate}>Save</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

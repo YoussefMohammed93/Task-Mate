@@ -3,6 +3,7 @@
 import {
   CalendarClock,
   ChevronRight,
+  Clock4,
   Loader,
   Square,
   Trash,
@@ -53,7 +54,7 @@ export default function Today() {
   const [isDeleting, setIsDeleting] = useState(false);
   const isLoading = tasks === undefined;
   const [sortOption, setSortOption] = useState<
-    "newest" | "oldest" | "completed" | "high" | "medium" | "low"
+    "newest" | "oldest" | "completed" | "high" | "medium" | "low" | "dueDate"
   >("newest");
 
   const sortedTasks = tasks
@@ -71,6 +72,11 @@ export default function Today() {
           }
           if (sortOption === "oldest") {
             return a.createdAt - b.createdAt;
+          }
+          if (sortOption === "dueDate") {
+            const dateA = a.dueDate ? new Date(a.dueDate).getTime() : Infinity;
+            const dateB = b.dueDate ? new Date(b.dueDate).getTime() : Infinity;
+            return dateA - dateB;
           }
           return 0;
         })
@@ -188,6 +194,7 @@ export default function Today() {
               <SelectItem value="low">Low Priority</SelectItem>
               <SelectItem value="medium">Medium Priority</SelectItem>
               <SelectItem value="high">High Priority</SelectItem>
+              <SelectItem value="dueDate">Due Date</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -211,7 +218,7 @@ export default function Today() {
               ) : (
                 <>
                   Delete all tasks
-                  <Trash className="hidden sm:block" />
+                  <Trash />
                 </>
               )}
             </Button>
@@ -265,7 +272,7 @@ export default function Today() {
                   />
                   <h2 className="text-xl font-medium">{task.name}</h2>
                   <p
-                    className={`text-sm ml-2 px-5 py-1 rounded-full ${
+                    className={`hidden md:block text-sm ml-2 p-1 px-1.5 rounded ${
                       task.priority === "high"
                         ? "bg-red-100 text-red-950"
                         : task.priority === "medium"
@@ -277,11 +284,46 @@ export default function Today() {
                       task.priority.slice(1)}{" "}
                     priority
                   </p>
+                  <div
+                    className={`hidden md:flex text-[12.5px] items-center gap-1.5 p-1 px-1.5 rounded ${
+                      task.dueDate
+                        ? (() => {
+                            const now = new Date();
+                            const dueDate = new Date(task.dueDate);
+                            const timeDiff = dueDate.getTime() - now.getTime();
+                            const hoursLeft = timeDiff / (1000 * 60 * 60);
+
+                            if (hoursLeft > 24)
+                              return "bg-green-100 text-green-950";
+                            if (hoursLeft <= 24 && hoursLeft > 12)
+                              return "bg-orange-100 text-orange-950";
+                            if (hoursLeft <= 12 && hoursLeft > 4)
+                              return "bg-orange-100 text-orange-950";
+                            if (hoursLeft <= 4)
+                              return "bg-red-100 text-red-950";
+                            return "bg-gray-100 text-gray-950";
+                          })()
+                        : "bg-gray-100 text-gray-950"
+                    }`}
+                  >
+                    <Clock4 className="size-3.5" />
+                    <p>
+                      {task.dueDate
+                        ? `${new Intl.DateTimeFormat("en-GB", {
+                            timeZone: "Africa/Cairo",
+                            day: "2-digit",
+                            month: "short",
+                          }).format(new Date(task.dueDate))}`
+                        : "No due date"}
+                    </p>
+                  </div>
                 </div>
                 <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-5">
-                  <div className="flex items-center gap-1 sm:gap-3 text-muted-foreground">
+                  <div className="flex items-center gap-1.5 sm:gap-3 text-muted-foreground">
                     <CalendarClock className="size-5" />
-                    <p>{formatDate(task.createdAt)}</p>
+                    <p className="text-sm md:text-base">
+                      Created at : {formatDate(task.createdAt)}
+                    </p>
                   </div>
                   <div className="flex gap-3">
                     <div className="flex items-center gap-1 sm:gap-2">
@@ -289,7 +331,7 @@ export default function Today() {
                         {task.subtasks?.length || 0} Subtasks
                       </p>
                     </div>
-                    <div className="flex items-center gap-1 sm:gap-2">
+                    <div className="flex items-center gap-1">
                       {(() => {
                         const customCategoryMatch = task.category.match(
                           /^(.*) \((#[A-Fa-f0-9]{6})\)$/
@@ -314,24 +356,73 @@ export default function Today() {
                       })()}
                     </div>
                   </div>
-                  <div className="relative right-1">
+                  <div className="flex flex-wrap relative right-1">
                     {task.tags?.map((tag, index) => {
                       const bgColors = [
-                        "bg-blue-200/90 text-blue-900",
-                        "bg-green-200/90 text-green-900",
-                        "bg-orange-200/90 text-orange-900",
+                        "bg-blue-100 text-blue-950",
+                        "bg-green-100 text-green-950",
+                        "bg-orange-100 text-orange-950",
                       ];
                       const bgColor = bgColors[index % bgColors.length];
 
                       return (
                         <span
                           key={index}
-                          className={`inline-block text-xs mx-1 px-4 py-1 rounded-full ${bgColor}`}
+                          className={`inline-block text-xs mx-1 p-1 px-1.5 rounded ${bgColor}`}
                         >
                           {tag}
                         </span>
                       );
                     })}
+                  </div>
+                  <div className="flex gap-2 md:hidden">
+                    <p
+                      className={`text-sm p-1 px-1.5 rounded ${
+                        task.priority === "high"
+                          ? "bg-red-100 text-red-950"
+                          : task.priority === "medium"
+                            ? "bg-orange-100 text-orange-950"
+                            : "bg-green-100 text-green-950"
+                      }`}
+                    >
+                      {task.priority.charAt(0).toUpperCase() +
+                        task.priority.slice(1)}{" "}
+                      priority
+                    </p>
+                    <div
+                      className={`flex text-[12.5px] items-center gap-1.5 p-1 px-1.5 rounded ${
+                        task.dueDate
+                          ? (() => {
+                              const now = new Date();
+                              const dueDate = new Date(task.dueDate);
+                              const timeDiff =
+                                dueDate.getTime() - now.getTime();
+                              const hoursLeft = timeDiff / (1000 * 60 * 60);
+
+                              if (hoursLeft > 24)
+                                return "bg-green-100 text-green-950";
+                              if (hoursLeft <= 24 && hoursLeft > 12)
+                                return "bg-orange-100 text-orange-950";
+                              if (hoursLeft <= 12 && hoursLeft > 4)
+                                return "bg-orange-100 text-orange-950";
+                              if (hoursLeft <= 4)
+                                return "bg-red-100 text-red-950";
+                              return "bg-gray-100 text-gray-950";
+                            })()
+                          : "bg-gray-100 text-gray-950"
+                      }`}
+                    >
+                      <Clock4 className="size-3.5" />
+                      <p>
+                        {task.dueDate
+                          ? `${new Intl.DateTimeFormat("en-GB", {
+                              timeZone: "Africa/Cairo",
+                              day: "2-digit",
+                              month: "short",
+                            }).format(new Date(task.dueDate))}`
+                          : "No due date"}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>

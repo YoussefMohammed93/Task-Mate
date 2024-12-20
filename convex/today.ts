@@ -33,6 +33,8 @@ export const add = mutation({
     ),
     priority: v.union(v.literal("high"), v.literal("medium"), v.literal("low")),
     tags: v.optional(v.array(v.string())),
+    dueDate: v.optional(v.string()),
+    dueTime: v.optional(v.string()),
   },
   handler: async (
     ctx,
@@ -45,6 +47,8 @@ export const add = mutation({
       subtasks,
       priority,
       tags,
+      dueDate,
+      dueTime,
     }
   ) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -62,6 +66,8 @@ export const add = mutation({
       subtasks: subtasks || [],
       priority,
       tags: tags || [],
+      dueDate: dueDate || undefined,
+      dueTime: dueTime || undefined,
     };
     return await ctx.db.insert("tasks", task);
   },
@@ -105,10 +111,23 @@ export const update = mutation({
       v.union(v.literal("high"), v.literal("medium"), v.literal("low"))
     ),
     tags: v.optional(v.array(v.string())),
+    dueDate: v.optional(v.string()),
+    dueTime: v.optional(v.string()),
   },
   handler: async (
     ctx,
-    { id, name, category, isCompleted, description, subtasks, priority, tags }
+    {
+      id,
+      name,
+      category,
+      isCompleted,
+      description,
+      subtasks,
+      priority,
+      tags,
+      dueDate,
+      dueTime,
+    }
   ) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
@@ -128,6 +147,8 @@ export const update = mutation({
       subtasks?: { title: string; isCompleted: boolean }[];
       priority: "high" | "medium" | "low";
       tags: string[];
+      dueDate?: string;
+      dueTime?: string;
       createdAt: number;
     }> = {};
 
@@ -138,6 +159,8 @@ export const update = mutation({
     if (subtasks !== undefined) updates.subtasks = subtasks;
     if (priority !== undefined) updates.priority = priority;
     if (tags !== undefined) updates.tags = tags;
+    if (dueDate !== undefined) updates.dueDate = dueDate;
+    if (dueTime !== undefined) updates.dueTime = dueTime;
 
     if (name || category || description) {
       updates.createdAt = Date.now();

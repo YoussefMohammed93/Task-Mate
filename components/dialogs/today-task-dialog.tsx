@@ -15,13 +15,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import Calendar from "react-calendar";
 import React, { useState } from "react";
+import "react-calendar/dist/Calendar.css";
 import { Textarea } from "../ui/textarea";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Plus, Trash } from "lucide-react";
+import { AlertTriangle, CalendarDays, Plus, Trash } from "lucide-react";
 
 export function TodayTaskDialog() {
   const addTaskMutation = useMutation(api.today.add);
@@ -29,6 +31,7 @@ export function TodayTaskDialog() {
   const [error, setError] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [description, setDescription] = useState<string>("");
+
   const [category, setCategory] = useState<string | undefined>(undefined);
   const [useCustomCategory, setUseCustomCategory] = useState(false);
   const [customCategoryName, setCustomCategoryName] = useState<string>("");
@@ -37,12 +40,15 @@ export function TodayTaskDialog() {
   const [subtasks, setSubtasks] = useState<
     { title: string; isCompleted: boolean }[]
   >([]);
-
   const [priority, setPriority] = useState<"high" | "medium" | "low" | null>(
     null
   );
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState<string>("");
+
+  const [dueDateDialogOpen, setDueDateDialogOpen] = useState(false);
+  const [dueDate, setDueDate] = useState<Date | null>(null);
+  const [dueTime, setDueTime] = useState<string>("12:00");
 
   const handleAddTag = () => {
     if (tags.length < 3 && newTag.trim() !== "") {
@@ -76,6 +82,22 @@ export function TodayTaskDialog() {
       (_, subtaskIndex) => subtaskIndex !== index
     );
     setSubtasks(newSubtasks);
+  };
+
+  const handleSaveDueDate = () => {
+    if (!dueDate) {
+      toast.error("Please select a due date!");
+      return;
+    }
+
+    const [hours, minutes] = dueTime.split(":").map((t) => parseInt(t, 10));
+    const updatedDate = new Date(dueDate);
+    updatedDate.setHours(hours);
+    updatedDate.setMinutes(minutes);
+
+    toast.success(`Due date set to: ${updatedDate.toLocaleString()}`);
+    setDueDate(updatedDate);
+    setDueDateDialogOpen(false);
   };
 
   const handleAddTask = async () => {
@@ -115,6 +137,11 @@ export function TodayTaskDialog() {
       return;
     }
 
+    if (!dueDate) {
+      setError("Due date is required!");
+      return;
+    }
+
     try {
       setError(null);
       await addTaskMutation({
@@ -126,6 +153,8 @@ export function TodayTaskDialog() {
         createdAt: Date.now(),
         priority,
         tags,
+        dueDate: dueDate.toISOString(),
+        dueTime,
       });
 
       setTaskName("");
@@ -137,6 +166,8 @@ export function TodayTaskDialog() {
       setSubtasks([]);
       setPriority(null);
       setTags([]);
+      setDueDate(null);
+      setDueTime("12:00");
 
       toast.success("Task added successfully!");
       setIsDialogOpen(false);
@@ -151,7 +182,7 @@ export function TodayTaskDialog() {
       <DialogTrigger asChild>
         <Button variant="outline">
           Add new task
-          <Plus className="mr-2 hidden sm:block" />
+          <Plus />
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -194,30 +225,55 @@ export function TodayTaskDialog() {
             </SelectContent>
           </Select>
           {useCustomCategory && (
-            <>
-              <div className="w-full flex flex-col md:flex-row gap-2 sm:gap-5">
-                <div className="md:w-3/4">
-                  <Input
-                    placeholder="Custom category name"
-                    value={customCategoryName}
-                    onChange={(e) => setCustomCategoryName(e.target.value)}
-                  />
-                </div>
-                <div className="md:w-1/4 flex items-center gap-2">
-                  <label htmlFor="color" className="font-medium">
-                    Category Color
-                  </label>
-                  <Input
-                    type="color"
-                    id="color"
-                    className="w-8 h-8 p-0 rounded-none shadow-none border-none cursor-pointer"
-                    value={customCategoryColor}
-                    onChange={(e) => setCustomCategoryColor(e.target.value)}
-                  />
-                </div>
+            <div className="w-full flex flex-col md:flex-row gap-2 sm:gap-5">
+              <div className="md:w-3/4">
+                <Input
+                  placeholder="Custom category name"
+                  value={customCategoryName}
+                  onChange={(e) => setCustomCategoryName(e.target.value)}
+                />
               </div>
-            </>
+              <div className="md:w-1/4 flex items-center gap-2">
+                <label htmlFor="color" className="font-medium">
+                  Category Color
+                </label>
+                <Input
+                  type="color"
+                  id="color"
+                  className="w-8 h-8 p-0 rounded-none shadow-none border-none cursor-pointer"
+                  value={customCategoryColor}
+                  onChange={(e) => setCustomCategoryColor(e.target.value)}
+                />
+              </div>
+            </div>
           )}
+          <div>
+            <Button
+              variant="outline"
+              onClick={() => setDueDateDialogOpen(true)}
+            >
+              Set Due Date <CalendarDays />
+            </Button>
+            {dueDate && (
+              <p className="mt-2 text-muted-foreground">
+                <span>Due Date : </span>
+                {dueDate &&
+                  `${new Intl.DateTimeFormat("en-GB", {
+                    timeZone: "Africa/Cairo",
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                  }).format(new Date(dueDate))} at ${new Date(
+                    `${new Date(dueDate).toDateString()} ${dueTime}`
+                  ).toLocaleTimeString("en-US", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: true,
+                    timeZone: "Africa/Cairo",
+                  })}`}
+              </p>
+            )}
+          </div>
           <div className="w-full flex gap-2">
             <div className="w-1/4">
               <h3 className="font-medium mb-1">Priority</h3>
@@ -307,6 +363,32 @@ export function TodayTaskDialog() {
           </Button>
         </div>
       </DialogContent>
+      {dueDateDialogOpen && (
+        <Dialog open={dueDateDialogOpen} onOpenChange={setDueDateDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Set Due Date</DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-col items-center gap-4">
+              <Calendar
+                onChange={(value) => setDueDate(value as Date)}
+                value={dueDate}
+                minDate={new Date()}
+              />
+              <div className="flex gap-2 items-center">
+                <label htmlFor="time">Time:</label>
+                <Input
+                  id="time"
+                  type="time"
+                  value={dueTime}
+                  onChange={(e) => setDueTime(e.target.value)}
+                />
+              </div>
+              <Button onClick={handleSaveDueDate}>Save</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </Dialog>
   );
 }

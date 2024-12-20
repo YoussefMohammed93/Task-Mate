@@ -37,7 +37,7 @@ export default function RootLayout({
               <Sidebar />
               <div className="flex-1">
                 <Navbar />
-                <main className="md:pl-80 pt-16">{children}</main>
+                <main className="md:pl-60 lg:pl-80 pt-16">{children}</main>
               </div>
             </div>
             <Toaster position="bottom-right" />

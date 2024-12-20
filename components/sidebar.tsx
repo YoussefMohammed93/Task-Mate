@@ -25,7 +25,7 @@ export const Sidebar = () => {
     <div
       className={`fixed h-screen transition-all z-50 duration-300 overflow-hidden bg-gray-100 ${
         isSidebarVisible ? "w-0" : "w-full absolute"
-      } md:w-[300px] flex flex-col`}
+      } md:w-[220px] lg:w-[300px] flex flex-col`}
     >
       <div className="w-full absolute top-[6.9vh] h-[93.1vh] -z-10 border-r"></div>
       <button className="md:hidden py-2.5 px-5" onClick={toggleSidebar}>

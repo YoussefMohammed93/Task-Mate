@@ -19,6 +19,8 @@ export default defineSchema({
     ),
     priority: v.union(v.literal("high"), v.literal("medium"), v.literal("low")),
     tags: v.optional(v.array(v.string())),
+    dueDate: v.optional(v.string()),
+    dueTime: v.optional(v.string()),
   }).index("by_user", ["userId"]),
 
   pomodoro: defineTable({

@@ -67,3 +67,29 @@
     @apply bg-background text-foreground;
   }
 }
+
+::-webkit-scrollbar {
+  width: 12.5px;
+}
+::-webkit-scrollbar-track {
+  border-radius: 100%;
+  background: white;
+}
+::-webkit-scrollbar-thumb {
+  border-radius: 12px;
+  background: #16a34a;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #16a34a;
+}
+
+.react-calendar {
+  margin-top: 20px;
+  width: 320px !important;
+}
+
+@media (min-width: 640px) {
+  .react-calendar {
+    width: 80% !important;
+  }
+}
