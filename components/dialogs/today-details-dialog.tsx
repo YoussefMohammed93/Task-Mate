@@ -135,13 +135,20 @@ export function TaskDetailsDialog({
     }
 
     const [hours, minutes] = dueTime.split(":").map(Number);
-    const combinedDueDate = new Date(dueDate);
-    combinedDueDate.setHours(hours);
-    combinedDueDate.setMinutes(minutes);
+    const now = new Date();
+    const selectedDateTime = new Date(dueDate);
+    selectedDateTime.setHours(hours, minutes);
 
-    const cairoTime = formatCairoTime(combinedDueDate);
+    if (
+      selectedDateTime < now &&
+      selectedDateTime.toDateString() === now.toDateString()
+    ) {
+      toast.error("Cannot set due time in the past for today!");
+      return;
+    }
 
-    toast.success(`Due date updated to: ${cairoTime}`);
+    toast.success(`Due date updated to: ${formatCairoTime(selectedDateTime)}`);
+    setDueDate(selectedDateTime);
     setDueDateDialogOpen(false);
   };
 
@@ -258,6 +265,19 @@ export function TaskDetailsDialog({
     setSubtasks(subtasks.filter((_, i) => i !== index));
   };
 
+  const getTaskStatus = (): "In Progress" | "Pending" | "Done" => {
+    if (task?.isCompleted) return "Done";
+
+    const now = new Date();
+    const dueDateTime = dueDate ? new Date(dueDate) : null;
+
+    if (dueDateTime && now > dueDateTime) return "Pending";
+
+    return "In Progress";
+  };
+
+  const taskStatus = getTaskStatus();
+
   if (!task) return null;
 
   return (
@@ -265,7 +285,20 @@ export function TaskDetailsDialog({
       <Dialog open={!!task} onOpenChange={onClose}>
         <DialogContent className="p-6 xl:max-w-4xl">
           <DialogHeader>
-            <DialogTitle>Edit Task</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              Edit Task -
+              <span
+                className={`px-2 py-1 rounded text-sm ${
+                  taskStatus === "Done"
+                    ? "bg-green-200 text-green-800"
+                    : taskStatus === "Pending"
+                      ? "bg-yellow-200 text-yellow-800"
+                      : "bg-blue-200 text-blue-800"
+                }`}
+              >
+                {taskStatus}
+              </span>
+            </DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-4 mt-3">
             <Label>Task name</Label>
@@ -274,7 +307,7 @@ export function TaskDetailsDialog({
               value={taskName}
               onChange={(e) => setTaskName(e.target.value)}
             />
-             <Label>Task description</Label>
+            <Label>Task description</Label>
             <Textarea
               placeholder="Task description"
               value={description}
@@ -475,9 +508,20 @@ export function TaskDetailsDialog({
           </DialogHeader>
           <div className="flex flex-col gap-4 items-center">
             <Calendar
-              onChange={(value) => setDueDate(value as Date)}
+              onChange={(value) => {
+                const selectedDate = value as Date;
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                if (selectedDate < today) {
+                  toast.error("Cannot select a past date!");
+                  return;
+                }
+
+                setDueDate(selectedDate);
+              }}
               value={dueDate}
-              minDate={new Date()}
+              minDate={new Date()} // Restrict past dates
             />
             <div className="flex items-center gap-2">
               <label htmlFor="time">Time:</label>
@@ -485,7 +529,24 @@ export function TaskDetailsDialog({
                 id="time"
                 type="time"
                 value={dueTime}
-                onChange={(e) => setDueTime(e.target.value)}
+                onChange={(e) => {
+                  const [hours, minutes] = e.target.value
+                    .split(":")
+                    .map(Number);
+                  const now = new Date();
+                  const selectedDateTime = new Date(dueDate || now);
+                  selectedDateTime.setHours(hours, minutes);
+
+                  if (
+                    selectedDateTime < now &&
+                    selectedDateTime.toDateString() === now.toDateString()
+                  ) {
+                    toast.error("Cannot set time in the past for today!");
+                    return;
+                  }
+
+                  setDueTime(e.target.value);
+                }}
               />
             </div>
             <div className="flex justify-end gap-2">

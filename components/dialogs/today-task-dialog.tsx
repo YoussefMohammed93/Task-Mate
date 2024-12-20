@@ -364,30 +364,55 @@ export function TodayTaskDialog() {
         </div>
       </DialogContent>
       {dueDateDialogOpen && (
-        <Dialog open={dueDateDialogOpen} onOpenChange={setDueDateDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Set Due Date</DialogTitle>
-            </DialogHeader>
-            <div className="flex flex-col items-center gap-4">
-              <Calendar
-                onChange={(value) => setDueDate(value as Date)}
-                value={dueDate}
-                minDate={new Date()}
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Set Due Date</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center gap-4">
+            <Calendar
+              onChange={(value) => {
+                const selectedDate = value as Date;
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                if (selectedDate < today) {
+                  toast.error("You cannot select a past date!");
+                  return;
+                }
+                setDueDate(selectedDate);
+              }}
+              value={dueDate}
+              minDate={new Date()}
+            />
+            <div className="flex gap-2 items-center">
+              <label htmlFor="time">Time:</label>
+              <Input
+                id="time"
+                type="time"
+                value={dueTime}
+                onChange={(e) => {
+                  const [hours, minutes] = e.target.value
+                    .split(":")
+                    .map(Number);
+                  const now = new Date();
+
+                  if (
+                    dueDate &&
+                    dueDate.toDateString() === now.toDateString() &&
+                    (hours < now.getHours() ||
+                      (hours === now.getHours() && minutes <= now.getMinutes()))
+                  ) {
+                    toast.error("You cannot select a past time!");
+                    return;
+                  }
+
+                  setDueTime(e.target.value);
+                }}
               />
-              <div className="flex gap-2 items-center">
-                <label htmlFor="time">Time:</label>
-                <Input
-                  id="time"
-                  type="time"
-                  value={dueTime}
-                  onChange={(e) => setDueTime(e.target.value)}
-                />
-              </div>
-              <Button onClick={handleSaveDueDate}>Save</Button>
             </div>
-          </DialogContent>
-        </Dialog>
+            <Button onClick={handleSaveDueDate}>Save</Button>
+          </div>
+        </DialogContent>
       )}
     </Dialog>
   );

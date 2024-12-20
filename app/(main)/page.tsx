@@ -56,6 +56,7 @@ type Task = {
   _creationTime: number;
   priority: "high" | "medium" | "low";
   tags?: string[];
+  dueDate?: string;
 };
 
 export default function Today() {
@@ -112,6 +113,17 @@ export default function Today() {
           return 0;
         })
     : [];
+
+  const getTaskState = (task: Task): string => {
+    const now = new Date().getTime();
+    const dueDate = task.dueDate ? new Date(task.dueDate).getTime() : null;
+
+    if (dueDate && now > dueDate) {
+      return task.isCompleted ? "Done" : "Pending";
+    }
+
+    return "In progress";
+  };
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -180,128 +192,40 @@ export default function Today() {
     }
   };
 
-  const renderDefaultView = () =>
-    sortedTasks.map((task) => (
-      <div
-        key={task._id}
-        role="button"
-        className="border-b px-3 py-3 flex items-center justify-between hover:bg-[#aeaeae17]"
-        onClick={() => setSelectedTask(task)}
-      >
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-3">
-            <Checkbox
-              id={`task-${task._id}`}
-              checked={task.isCompleted}
-              className="size-6 rounded-none"
-              onClick={(e) => e.stopPropagation()}
-              onCheckedChange={() => toggleCompletion(task)}
-            />
-            <h2 className="text-xl font-medium">{task.name}</h2>
-            <p
-              className={`hidden md:block text-sm ml-2 p-1 px-1.5 rounded ${
-                task.priority === "high"
-                  ? "bg-red-100 text-red-950"
-                  : task.priority === "medium"
-                    ? "bg-orange-100 text-orange-950"
-                    : "bg-green-100 text-green-950"
-              }`}
-            >
-              {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}{" "}
-              priority
-            </p>
-            <div
-              className={`hidden md:flex text-[12.5px] items-center gap-1.5 p-1 px-1.5 rounded ${
-                task.dueDate
-                  ? (() => {
-                      const now = new Date();
-                      const dueDate = new Date(task.dueDate);
-                      const timeDiff = dueDate.getTime() - now.getTime();
-                      const hoursLeft = timeDiff / (1000 * 60 * 60);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [currentTime, setCurrentTime] = useState(new Date().getTime());
 
-                      if (hoursLeft > 24) return "bg-green-100 text-green-950";
-                      if (hoursLeft <= 24 && hoursLeft > 12)
-                        return "bg-orange-100 text-orange-950";
-                      if (hoursLeft <= 12 && hoursLeft > 4)
-                        return "bg-orange-100 text-orange-950";
-                      if (hoursLeft <= 4) return "bg-red-100 text-red-950";
-                      return "bg-gray-100 text-gray-950";
-                    })()
-                  : "bg-gray-100 text-gray-950"
-              }`}
-            >
-              <Clock4 className="size-3.5" />
-              <p>
-                {task.dueDate
-                  ? `${new Intl.DateTimeFormat("en-GB", {
-                      timeZone: "Africa/Cairo",
-                      day: "2-digit",
-                      month: "short",
-                    }).format(new Date(task.dueDate))}`
-                  : "No due date"}
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-5">
-            <div className="flex items-center gap-1.5 sm:gap-3 text-muted-foreground">
-              <CalendarClock className="size-5" />
-              <p className="text-sm md:text-base">
-                Created at : {formatDate(task.createdAt)}
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <div className="flex items-center gap-1 sm:gap-2">
-                <p className="text-sm sm:text-base font-medium text-muted-foreground">
-                  {task.subtasks?.length || 0} Subtasks
-                </p>
-              </div>
-              <div className="flex items-center gap-1">
-                {(() => {
-                  const customCategoryMatch = task.category.match(
-                    /^(.*) \((#[A-Fa-f0-9]{6})\)$/
-                  );
-                  const categoryName = customCategoryMatch
-                    ? customCategoryMatch[1]
-                    : task.category;
-                  const categoryColor = customCategoryMatch
-                    ? customCategoryMatch[2]
-                    : categoryColors[task.category] || "#6b7280";
-                  return (
-                    <>
-                      <Square
-                        className={`size-6 fill-[${categoryColor}] stroke-none`}
-                        style={{ fill: categoryColor }}
-                      />
-                      <p className="text-sm sm:text-base font-medium text-zinc-600">
-                        {categoryName}
-                      </p>
-                    </>
-                  );
-                })()}
-              </div>
-            </div>
-            <div className="flex flex-wrap relative right-1">
-              {task.tags?.map((tag, index) => {
-                const bgColors = [
-                  "bg-red-100 text-red-950",
-                  "bg-blue-100 text-blue-950",
-                  "bg-emerald-100 text-emerald-950",
-                ];
-                const bgColor = bgColors[index % bgColors.length];
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(new Date().getTime());
+    }, 60000);
 
-                return (
-                  <span
-                    key={index}
-                    className={`inline-block text-xs mx-1 p-1 px-1.5 rounded ${bgColor}`}
-                  >
-                    {tag}
-                  </span>
-                );
-              })}
-            </div>
-            <div className="flex gap-2 md:hidden">
+    return () => clearInterval(interval);
+  }, []);
+
+  const renderDefaultView = () => {
+    return sortedTasks.map((task) => {
+      const taskState = getTaskState(task);
+
+      return (
+        <div
+          key={task._id}
+          role="button"
+          className="border-b px-3 py-3 flex items-center justify-between hover:bg-[#aeaeae17]"
+          onClick={() => setSelectedTask(task)}
+        >
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-3">
+              <Checkbox
+                id={`task-${task._id}`}
+                checked={task.isCompleted}
+                className="size-6 rounded-none"
+                onClick={(e) => e.stopPropagation()}
+                onCheckedChange={() => toggleCompletion(task)}
+              />
+              <h2 className="text-xl font-medium">{task.name}</h2>
               <p
-                className={`text-sm p-1 px-1.5 rounded ${
+                className={`hidden md:block text-sm ml-2 p-1 px-1.5 rounded ${
                   task.priority === "high"
                     ? "bg-red-100 text-red-950"
                     : task.priority === "medium"
@@ -312,44 +236,84 @@ export default function Today() {
                 {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}{" "}
                 priority
               </p>
-              <div
-                className={`flex text-[12.5px] items-center gap-1.5 p-1 px-1.5 rounded ${
-                  task.dueDate
-                    ? (() => {
-                        const now = new Date();
-                        const dueDate = new Date(task.dueDate);
-                        const timeDiff = dueDate.getTime() - now.getTime();
-                        const hoursLeft = timeDiff / (1000 * 60 * 60);
-
-                        if (hoursLeft > 24)
-                          return "bg-green-100 text-green-950";
-                        if (hoursLeft <= 24 && hoursLeft > 12)
-                          return "bg-orange-100 text-orange-950";
-                        if (hoursLeft <= 12 && hoursLeft > 4)
-                          return "bg-orange-100 text-orange-950";
-                        if (hoursLeft <= 4) return "bg-red-100 text-red-950";
-                        return "bg-gray-100 text-gray-950";
-                      })()
-                    : "bg-gray-100 text-gray-950"
-                }`}
-              >
-                <Clock4 className="size-3.5" />
-                <p>
-                  {task.dueDate
-                    ? `${new Intl.DateTimeFormat("en-GB", {
-                        timeZone: "Africa/Cairo",
-                        day: "2-digit",
-                        month: "short",
-                      }).format(new Date(task.dueDate))}`
-                    : "No due date"}
+              <div className="mb-0.5">
+                <span
+                  className={`text-[12.5px] items-center gap-1.5 py-[5px] px-1.5 rounded ${
+                    taskState === "Done"
+                      ? "bg-green-100 text-green-950"
+                      : taskState === "Pending"
+                        ? "bg-yellow-100 text-yellow-950"
+                        : "bg-blue-100 text-blue-950"
+                  }`}
+                >
+                  {taskState}
+                </span>
+              </div>
+            </div>
+            <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-5">
+              <div className="flex items-center gap-1.5 sm:gap-3 text-muted-foreground">
+                <CalendarClock className="size-5" />
+                <p className="text-sm md:text-base">
+                  Created at : {formatDate(task.createdAt)}
                 </p>
+              </div>
+              <div className="flex gap-3">
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <p className="text-sm sm:text-base font-medium text-muted-foreground">
+                    {task.subtasks?.length || 0} Subtasks
+                  </p>
+                </div>
+                <div className="flex items-center gap-1">
+                  {(() => {
+                    const customCategoryMatch = task.category.match(
+                      /^(.*) \((#[A-Fa-f0-9]{6})\)$/
+                    );
+                    const categoryName = customCategoryMatch
+                      ? customCategoryMatch[1]
+                      : task.category;
+                    const categoryColor = customCategoryMatch
+                      ? customCategoryMatch[2]
+                      : categoryColors[task.category] || "#6b7280";
+                    return (
+                      <>
+                        <Square
+                          className={`size-6 fill-[${categoryColor}] stroke-none`}
+                          style={{ fill: categoryColor }}
+                        />
+                        <p className="text-sm sm:text-base font-medium text-zinc-600">
+                          {categoryName}
+                        </p>
+                      </>
+                    );
+                  })()}
+                </div>
+              </div>
+              <div className="flex flex-wrap relative right-1">
+                {task.tags?.map((tag, index) => {
+                  const bgColors = [
+                    "bg-red-100 text-red-950",
+                    "bg-blue-100 text-blue-950",
+                    "bg-emerald-100 text-emerald-950",
+                  ];
+                  const bgColor = bgColors[index % bgColors.length];
+
+                  return (
+                    <span
+                      key={index}
+                      className={`inline-block text-xs mx-1 p-1 px-1.5 rounded ${bgColor}`}
+                    >
+                      {tag}
+                    </span>
+                  );
+                })}
               </div>
             </div>
           </div>
+          <ChevronRight className="block size-6" />
         </div>
-        <ChevronRight className="block size-6" />
-      </div>
-    ));
+      );
+    });
+  };
 
   const renderTableView = () => (
     <div className="w-full">
@@ -379,6 +343,9 @@ export default function Today() {
                 </TableCell>
                 <TableCell className="font-medium px-4 py-2">
                   Due Date
+                </TableCell>
+                <TableCell className="font-medium px-4 py-2">
+                  Checkbox
                 </TableCell>
                 <TableCell className="font-medium px-4 py-2">Status</TableCell>
                 <TableCell className="font-medium px-4 py-2">Actions</TableCell>
@@ -453,6 +420,17 @@ export default function Today() {
                       onClick={(e) => e.stopPropagation()}
                       onCheckedChange={() => toggleCompletion(task)}
                     />
+                  </TableCell>
+                  <TableCell>
+                    <span
+                      className={`text-[12.5px] items-center gap-1.5 py-[5px] px-1.5 rounded ${
+                        task.isCompleted
+                          ? "bg-green-200 text-green-800"
+                          : "bg-yellow-200 text-yellow-800"
+                      }`}
+                    >
+                      {task.isCompleted ? "Done" : "Pending"}
+                    </span>
                   </TableCell>
                   <TableCell className="px-4 py-2">
                     <Button size="sm" onClick={() => setSelectedTask(task)}>
@@ -604,6 +582,15 @@ export default function Today() {
                 onClick={(e) => e.stopPropagation()}
                 onCheckedChange={() => toggleCompletion(task)}
               />
+              <span
+                className={`text-[12.5px] items-center gap-1.5 py-[5px] px-1.5 rounded ${
+                  task.isCompleted
+                    ? "bg-green-200 text-green-800"
+                    : "bg-yellow-200 text-yellow-800"
+                }`}
+              >
+                {task.isCompleted ? "Done" : "Pending"}
+              </span>
             </div>
           </div>
         ))}
