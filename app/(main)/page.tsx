@@ -1,14 +1,16 @@
 "use client";
 
 import {
-  AlignJustify,
-  CalendarClock,
-  ChevronRight,
   Clock4,
   Loader,
   Square,
-  Table,
+  Table2,
   Trash,
+  ChevronRight,
+  AlignJustify,
+  CalendarClock,
+  MoreHorizontal,
+  AlignHorizontalJustifyCenter,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -19,22 +21,30 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { api } from "@/convex/_generated/api";
+import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Id } from "@/convex/_generated/dataModel";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMutation, useQuery } from "convex/react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { TodayTaskDialog } from "@/components/dialogs/today-task-dialog";
 import { TaskDetailsDialog } from "@/components/dialogs/today-details-dialog";
-import { Label } from "@/components/ui/label";
 
 type Task = {
   _id: Id<"tasks">;
@@ -59,9 +69,24 @@ export default function Today() {
   const [sortOption, setSortOption] = useState<
     "newest" | "oldest" | "completed" | "high" | "medium" | "low" | "dueDate"
   >("newest");
+
   const [viewMode, setViewMode] = useState<"default" | "table" | "board">(
-    "default"
+    () => {
+      if (typeof window !== "undefined") {
+        return (
+          (localStorage.getItem("viewMode") as "default" | "table" | "board") ||
+          "default"
+        );
+      }
+      return "default";
+    }
   );
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("viewMode", viewMode);
+    }
+  }, [viewMode]);
 
   const sortedTasks = tasks
     ? [...tasks]
@@ -327,47 +352,264 @@ export default function Today() {
     ));
 
   const renderTableView = () => (
-    <table className="table-auto w-full border border-gray-300">
-      <thead>
-        <tr>
-          <th className="border px-4 py-2">Task Name</th>
-          <th className="border px-4 py-2">Priority</th>
-          <th className="border px-4 py-2">Category</th>
-          <th className="border px-4 py-2">Due Date</th>
-        </tr>
-      </thead>
-      <tbody>
-        {sortedTasks.map((task) => (
-          <tr key={task._id}>
-            <td className="border px-4 py-2">{task.name}</td>
-            <td className="border px-4 py-2">{task.priority}</td>
-            <td className="border px-4 py-2">{task.category}</td>
-            <td className="border px-4 py-2">
-              {task.dueDate || "No Due Date"}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  );
-
-  const renderBoardView = () => (
-    <div className="grid grid-cols-3 gap-4">
-      {["high", "medium", "low"].map((priority) => (
-        <div key={priority}>
-          <h3 className="font-bold text-lg">{priority.toUpperCase()}</h3>
-          {sortedTasks
-            .filter((task) => task.priority === priority)
-            .map((task) => (
-              <div key={task._id} className="border p-3 mb-2 rounded-lg">
-                <h4>{task.name}</h4>
-                <p className="text-sm text-gray-600">{task.category}</p>
-              </div>
-            ))}
-        </div>
-      ))}
+    <div className="w-full">
+      <div className="overflow-x-auto">
+        <ScrollArea className="w-full">
+          <Table className="table-auto w-full border border-gray-200">
+            <TableHeader className="bg-gray-100">
+              <TableRow>
+                <TableCell className="font-medium px-4 py-2">
+                  Task Name
+                </TableCell>
+                <TableCell className="font-medium px-4 py-2">Tags</TableCell>
+                <TableCell className="font-medium px-4 py-2">
+                  Description
+                </TableCell>
+                <TableCell className="font-medium px-4 py-2">
+                  Created At
+                </TableCell>
+                <TableCell className="font-medium px-4 py-2">
+                  Subtasks
+                </TableCell>
+                <TableCell className="font-medium px-4 py-2">
+                  Category
+                </TableCell>
+                <TableCell className="font-medium px-4 py-2">
+                  Priority
+                </TableCell>
+                <TableCell className="font-medium px-4 py-2">
+                  Due Date
+                </TableCell>
+                <TableCell className="font-medium px-4 py-2">Status</TableCell>
+                <TableCell className="font-medium px-4 py-2">Actions</TableCell>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {sortedTasks.map((task) => (
+                <TableRow key={task._id}>
+                  <TableCell className="px-4 py-2">{task.name}</TableCell>
+                  <TableCell className="px-4 py-2">
+                    {task.tags && task.tags.length > 0 ? (
+                      <div className="flex flex-wrap gap-1">
+                        {task.tags.map((tag, index) => {
+                          const bgColors = [
+                            "bg-red-200 text-red-950",
+                            "bg-blue-200 text-blue-950",
+                            "bg-emerald-200 text-emerald-950",
+                          ];
+                          const bgColor = bgColors[index % bgColors.length];
+                          return (
+                            <span
+                              key={index}
+                              className={`px-2 py-1 rounded text-xs ${bgColor}`}
+                            >
+                              {tag}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      "No Tags"
+                    )}
+                  </TableCell>
+                  <TableCell className="px-4 py-2 truncate max-w-[150px]">
+                    {task.description || "No Description"}
+                  </TableCell>
+                  <TableCell className="px-4 py-2">
+                    {formatDate(task.createdAt)}
+                  </TableCell>
+                  <TableCell className="px-4 py-2">
+                    {task.subtasks?.length || 0} Subtasks
+                  </TableCell>
+                  <TableCell className="px-4 py-2">{task.category}</TableCell>
+                  <TableCell className="px-4 py-2">
+                    <span
+                      className={`px-2 py-1 rounded text-xs ${
+                        task.priority === "high"
+                          ? "bg-red-200 text-red-950"
+                          : task.priority === "medium"
+                            ? "bg-yellow-200 text-yellow-800"
+                            : "bg-green-200 text-green-950"
+                      }`}
+                    >
+                      {task.priority.charAt(0).toUpperCase() +
+                        task.priority.slice(1)}
+                    </span>
+                  </TableCell>
+                  <TableCell className="px-4 py-2">
+                    {task.dueDate
+                      ? `${new Intl.DateTimeFormat("en-GB", {
+                          timeZone: "Africa/Cairo",
+                          day: "2-digit",
+                          month: "short",
+                        }).format(new Date(task.dueDate))}`
+                      : "No Due Date"}
+                  </TableCell>
+                  <TableCell className="px-5 py-2">
+                    <Checkbox
+                      id={`task-${task._id}`}
+                      checked={task.isCompleted}
+                      className="size-6 rounded-none"
+                      onClick={(e) => e.stopPropagation()}
+                      onCheckedChange={() => toggleCompletion(task)}
+                    />
+                  </TableCell>
+                  <TableCell className="px-4 py-2">
+                    <Button size="sm" onClick={() => setSelectedTask(task)}>
+                      Edit
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </ScrollArea>
+      </div>
     </div>
   );
+
+  const renderBoardView = () => {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+        {sortedTasks.map((task) => (
+          <div
+            key={task._id}
+            className="flex flex-col gap-3 p-4 rounded-sm shadow-sm border bg-[#f7f8f9]"
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-medium">{task.name}</h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedTask(task)}
+              >
+                <MoreHorizontal />
+              </Button>
+            </div>
+            {task.tags && task.tags.length > 0 && (
+              <div className="w-full flex p-1 px-[1.25px] rounded shadow-sm border bg-white">
+                {task.tags.map((tag, index) => {
+                  const bgColors = [
+                    "bg-red-200 text-red-950",
+                    "bg-blue-200 text-blue-950",
+                    "bg-emerald-200 text-emerald-950",
+                  ];
+
+                  const bgColor = bgColors[index % bgColors.length];
+                  return (
+                    <span
+                      key={index}
+                      className={`w-1/3 text-center text-xs mx-0.5 p-1 px-1.5 rounded ${bgColor}`}
+                    >
+                      {tag}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+            <div>
+              <p className="text-gray-600 truncate max-w-[200px]">
+                {task.description ? task.description : "No Description"}
+              </p>
+            </div>
+            <div className="flex items-center gap-1.5 sm:gap-3 text-gray-600">
+              <CalendarClock className="size-5" />
+              <p className="text-sm md:text-base">
+                Created at : {formatDate(task.createdAt)}
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <div className="flex items-center gap-1 sm:gap-2">
+                <p className="text-sm sm:text-base font-medium text-gray-700 bg-gray-200 p-1 px-1.5 rounded">
+                  {task.subtasks?.length || 0} Subtasks
+                </p>
+              </div>
+              <div className="flex items-center gap-1">
+                {(() => {
+                  const customCategoryMatch = task.category.match(
+                    /^(.*) \((#[A-Fa-f0-9]{6})\)$/
+                  );
+                  const categoryName = customCategoryMatch
+                    ? customCategoryMatch[1]
+                    : task.category;
+                  const categoryColor = customCategoryMatch
+                    ? customCategoryMatch[2]
+                    : categoryColors[task.category] || "#6b7280";
+                  return (
+                    <>
+                      <Square
+                        className={`size-6 fill-[${categoryColor}] stroke-none`}
+                        style={{ fill: categoryColor }}
+                      />
+                      <p className="text-sm sm:text-base font-medium text-gray-600">
+                        {categoryName}
+                      </p>
+                    </>
+                  );
+                })()}
+              </div>
+            </div>
+            <div className="w-full flex items-center gap-1">
+              <p
+                className={`hidden md:block w-1/2 text-sm p-1 px-1.5 rounded ${
+                  task.priority === "high"
+                    ? "bg-red-200 text-red-950"
+                    : task.priority === "medium"
+                      ? "bg-yellow-200 text-yellow-800"
+                      : "bg-green-200 text-green-950"
+                }`}
+              >
+                {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}{" "}
+                priority
+              </p>
+              <div
+                className={`hidden md:flex w-1/2 text-[12.5px] items-center gap-1.5 p-1 px-1.5 rounded ${
+                  task.dueDate
+                    ? (() => {
+                        const now = new Date();
+                        const dueDate = new Date(task.dueDate);
+                        const timeDiff = dueDate.getTime() - now.getTime();
+                        const hoursLeft = timeDiff / (1000 * 60 * 60);
+
+                        if (hoursLeft > 24)
+                          return "bg-green-200 text-green-950";
+                        if (hoursLeft <= 24 && hoursLeft > 12)
+                          return "bg-orange-200 text-orange-950";
+                        if (hoursLeft <= 12 && hoursLeft > 4)
+                          return "bg-orange-200 text-orange-950";
+                        if (hoursLeft <= 4) return "bg-red-200 text-red-950";
+                        return "bg-gray-200 text-gray-950";
+                      })()
+                    : "bg-gray-200 text-gray-950"
+                }`}
+              >
+                <Clock4 className="size-3.5" />
+                <p>
+                  {task.dueDate
+                    ? `${new Intl.DateTimeFormat("en-GB", {
+                        timeZone: "Africa/Cairo",
+                        day: "2-digit",
+                        month: "short",
+                      }).format(new Date(task.dueDate))}`
+                    : "No due date"}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 mt-auto">
+              <Label className="text-gray-600">Task status : </Label>
+              <Checkbox
+                id={`task-${task._id}`}
+                checked={task.isCompleted}
+                className="size-6 rounded-none"
+                onClick={(e) => e.stopPropagation()}
+                onCheckedChange={() => toggleCompletion(task)}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="pl-5 md:pl-0">
@@ -442,13 +684,13 @@ export default function Today() {
                 </SelectItem>
                 <SelectItem value="table">
                   <span className="flex items-center gap-1.5">
-                    <Table className="size-4" />
+                    <Table2 className="size-4" />
                     Table
                   </span>
                 </SelectItem>
                 <SelectItem value="board">
                   <span className="flex items-center gap-1.5">
-                    <Square className="size-4" />
+                    <AlignHorizontalJustifyCenter className="size-4" />
                     Board
                   </span>
                 </SelectItem>
@@ -487,7 +729,7 @@ export default function Today() {
         {isLoading ? (
           Array.from({ length: 5 }).map((_, index) => (
             <div key={index}>
-              <Skeleton className="w-full h-[110px] md:h-[80px] rounded-md my-2" />
+              <Skeleton className="w-full h-[110px] md:h-[80px] rounded-md my-2.5" />
             </div>
           ))
         ) : sortedTasks.length === 0 ? (
