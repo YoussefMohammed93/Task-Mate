@@ -93,3 +93,7 @@
     width: 80% !important;
   }
 }
+
+td {
+  border: 1px solid #e6e6e6;
+}

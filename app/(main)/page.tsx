@@ -236,6 +236,38 @@ export default function Today() {
                 {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}{" "}
                 priority
               </p>
+              <div
+                className={`hidden md:flex text-[12.5px] items-center gap-1.5 p-1 px-1.5 rounded ${
+                  task.dueDate
+                    ? (() => {
+                        const now = new Date();
+                        const dueDate = new Date(task.dueDate);
+                        const timeDiff = dueDate.getTime() - now.getTime();
+                        const hoursLeft = timeDiff / (1000 * 60 * 60);
+
+                        if (hoursLeft > 24)
+                          return "bg-green-100 text-green-950";
+                        if (hoursLeft <= 24 && hoursLeft > 12)
+                          return "bg-orange-100 text-orange-950";
+                        if (hoursLeft <= 12 && hoursLeft > 4)
+                          return "bg-orange-100 text-orange-950";
+                        if (hoursLeft <= 4) return "bg-red-100 text-red-950";
+                        return "bg-gray-100 text-gray-950";
+                      })()
+                    : "bg-gray-100 text-gray-950"
+                }`}
+              >
+                <Clock4 className="size-3.5" />
+                <p>
+                  {task.dueDate
+                    ? `${new Intl.DateTimeFormat("en-GB", {
+                        timeZone: "Africa/Cairo",
+                        day: "2-digit",
+                        month: "short",
+                      }).format(new Date(task.dueDate))}`
+                    : "No due date"}
+                </p>
+              </div>
               <div className="mb-0.5">
                 <span
                   className={`text-[12.5px] items-center gap-1.5 py-[5px] px-1.5 rounded ${
@@ -292,8 +324,8 @@ export default function Today() {
                 {task.tags?.map((tag, index) => {
                   const bgColors = [
                     "bg-red-100 text-red-950",
-                    "bg-blue-100 text-blue-950",
                     "bg-emerald-100 text-emerald-950",
+                    "bg-purple-100 text-purple-950",
                   ];
                   const bgColor = bgColors[index % bgColors.length];
 
@@ -307,6 +339,53 @@ export default function Today() {
                   );
                 })}
               </div>
+              <div className="flex items-center gap-2">
+                <p
+                  className={`block md:hidden text-sm p-1 px-1.5 rounded ${
+                    task.priority === "high"
+                      ? "bg-red-100 text-red-950"
+                      : task.priority === "medium"
+                        ? "bg-orange-100 text-orange-950"
+                        : "bg-green-100 text-green-950"
+                  }`}
+                >
+                  {task.priority.charAt(0).toUpperCase() +
+                    task.priority.slice(1)}{" "}
+                  priority
+                </p>
+                <div
+                  className={`flex md:hidden text-[12.5px] items-center gap-1.5 p-1 px-1.5 rounded ${
+                    task.dueDate
+                      ? (() => {
+                          const now = new Date();
+                          const dueDate = new Date(task.dueDate);
+                          const timeDiff = dueDate.getTime() - now.getTime();
+                          const hoursLeft = timeDiff / (1000 * 60 * 60);
+
+                          if (hoursLeft > 24)
+                            return "bg-green-100 text-green-950";
+                          if (hoursLeft <= 24 && hoursLeft > 12)
+                            return "bg-orange-100 text-orange-950";
+                          if (hoursLeft <= 12 && hoursLeft > 4)
+                            return "bg-orange-100 text-orange-950";
+                          if (hoursLeft <= 4) return "bg-red-100 text-red-950";
+                          return "bg-gray-100 text-gray-950";
+                        })()
+                      : "bg-gray-100 text-gray-950"
+                  }`}
+                >
+                  <Clock4 className="size-3.5" />
+                  <p>
+                    {task.dueDate
+                      ? `${new Intl.DateTimeFormat("en-GB", {
+                          timeZone: "Africa/Cairo",
+                          day: "2-digit",
+                          month: "short",
+                        }).format(new Date(task.dueDate))}`
+                      : "No due date"}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
           <ChevronRight className="block size-6" />
@@ -315,287 +394,346 @@ export default function Today() {
     });
   };
 
-  const renderTableView = () => (
-    <div className="w-full">
-      <div className="overflow-x-auto">
-        <ScrollArea className="w-full">
-          <Table className="table-auto w-full border border-gray-200">
-            <TableHeader className="bg-gray-100">
-              <TableRow>
-                <TableCell className="font-medium px-4 py-2">
-                  Task Name
-                </TableCell>
-                <TableCell className="font-medium px-4 py-2">Tags</TableCell>
-                <TableCell className="font-medium px-4 py-2">
-                  Description
-                </TableCell>
-                <TableCell className="font-medium px-4 py-2">
-                  Created At
-                </TableCell>
-                <TableCell className="font-medium px-4 py-2">
-                  Subtasks
-                </TableCell>
-                <TableCell className="font-medium px-4 py-2">
-                  Category
-                </TableCell>
-                <TableCell className="font-medium px-4 py-2">
-                  Priority
-                </TableCell>
-                <TableCell className="font-medium px-4 py-2">
-                  Due Date
-                </TableCell>
-                <TableCell className="font-medium px-4 py-2">
-                  Checkbox
-                </TableCell>
-                <TableCell className="font-medium px-4 py-2">Status</TableCell>
-                <TableCell className="font-medium px-4 py-2">Actions</TableCell>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sortedTasks.map((task) => (
-                <TableRow key={task._id}>
-                  <TableCell className="px-4 py-2">{task.name}</TableCell>
-                  <TableCell className="px-4 py-2">
-                    {task.tags && task.tags.length > 0 ? (
-                      <div className="flex flex-wrap gap-1">
-                        {task.tags.map((tag, index) => {
-                          const bgColors = [
-                            "bg-red-200 text-red-950",
-                            "bg-blue-200 text-blue-950",
-                            "bg-emerald-200 text-emerald-950",
-                          ];
-                          const bgColor = bgColors[index % bgColors.length];
-                          return (
-                            <span
-                              key={index}
-                              className={`px-2 py-1 rounded text-xs ${bgColor}`}
-                            >
-                              {tag}
-                            </span>
-                          );
-                        })}
-                      </div>
-                    ) : (
-                      "No Tags"
-                    )}
-                  </TableCell>
-                  <TableCell className="px-4 py-2 truncate max-w-[150px]">
-                    {task.description || "No Description"}
-                  </TableCell>
-                  <TableCell className="px-4 py-2">
-                    {formatDate(task.createdAt)}
-                  </TableCell>
-                  <TableCell className="px-4 py-2">
+  const renderTableView = () => {
+    return sortedTasks.map((task) => {
+      const taskState = getTaskState(task);
+      return (
+        <div key={task._id} className="w-full">
+          <div className="overflow-x-auto">
+            <ScrollArea className="w-full">
+              <Table className="table-auto w-full border border-gray-200">
+                <TableHeader className="bg-gray-100">
+                  <TableRow>
+                    <TableCell className="font-medium px-4 py-2">
+                      Task Name
+                    </TableCell>
+                    <TableCell className="font-medium px-4 py-2">
+                      Tags
+                    </TableCell>
+                    <TableCell className="font-medium px-4 py-2">
+                      Description
+                    </TableCell>
+                    <TableCell className="font-medium px-4 py-2">
+                      Created At
+                    </TableCell>
+                    <TableCell className="font-medium px-4 py-2">
+                      Subtasks
+                    </TableCell>
+                    <TableCell className="font-medium px-4 py-2">
+                      Category
+                    </TableCell>
+                    <TableCell className="font-medium px-4 py-2">
+                      Priority
+                    </TableCell>
+                    <TableCell className="font-medium px-4 py-2">
+                      Due Date
+                    </TableCell>
+                    <TableCell className="font-medium px-4 py-2">
+                      Status
+                    </TableCell>
+                    <TableCell className="font-medium px-4 py-2">
+                      Checkbox
+                    </TableCell>
+                    <TableCell className="font-medium px-4 py-2">
+                      Actions
+                    </TableCell>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {sortedTasks.map((task) => (
+                    <TableRow key={task._id}>
+                      <TableCell className="px-4 py-2">{task.name}</TableCell>
+                      <TableCell className="px-4 py-2">
+                        {task.tags && task.tags.length > 0 ? (
+                          <div className="flex flex-wrap gap-1">
+                            {task.tags.map((tag, index) => {
+                              const bgColors = [
+                                "bg-red-200 text-red-950",
+                                "bg-emerald-200 text-emerald-950",
+                                "bg-purple-200 text-purple-950",
+                              ];
+                              const bgColor = bgColors[index % bgColors.length];
+                              return (
+                                <p
+                                  key={index}
+                                  className={`w-max px-2 py-1 rounded text-xs ${bgColor}`}
+                                >
+                                  {tag}
+                                </p>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          "No Tags"
+                        )}
+                      </TableCell>
+                      <TableCell className="px-4 py-2 truncate max-w-[150px]">
+                        {task.description || "No Description"}
+                      </TableCell>
+                      <TableCell className="px-4 py-2">
+                        {formatDate(task.createdAt)}
+                      </TableCell>
+                      <TableCell className="px-5 py-2">
+                        <p className="w-max bg-gray-200 text-gray-800 rounded p-1 px-1.5">
+                          {task.subtasks?.length || 0} Subtasks
+                        </p>
+                      </TableCell>
+                      <TableCell className="px-4 py-2">
+                        <span className="w-max px-1.5 py-1 bg-blue-100 text-blue-800 rounded">
+                          {task.category}
+                        </span>
+                      </TableCell>
+                      <TableCell className="px-4 py-2">
+                        <span
+                          className={`px-2 py-1 rounded text-xs ${
+                            task.priority === "high"
+                              ? "bg-red-200 text-red-950"
+                              : task.priority === "medium"
+                                ? "bg-yellow-200 text-yellow-800"
+                                : "bg-green-200 text-green-950"
+                          }`}
+                        >
+                          {task.priority.charAt(0).toUpperCase() +
+                            task.priority.slice(1)}
+                        </span>
+                      </TableCell>
+                      <TableCell className="px-4 py-2">
+                        <div
+                          className={`w-max flex text-[12px] items-center gap-1.5 p-1 px-1.5 rounded ${
+                            task.dueDate
+                              ? (() => {
+                                  const now = new Date();
+                                  const dueDate = new Date(task.dueDate);
+                                  const timeDiff =
+                                    dueDate.getTime() - now.getTime();
+                                  const hoursLeft = timeDiff / (1000 * 60 * 60);
+
+                                  if (hoursLeft > 24)
+                                    return "bg-green-200 text-green-950";
+                                  if (hoursLeft <= 24 && hoursLeft > 12)
+                                    return "bg-orange-200 text-orange-950";
+                                  if (hoursLeft <= 12 && hoursLeft > 4)
+                                    return "bg-orange-200 text-orange-950";
+                                  if (hoursLeft <= 4)
+                                    return "bg-red-200 text-red-950";
+                                  return "bg-gray-200 text-gray-950";
+                                })()
+                              : "bg-gray-200 text-gray-950"
+                          }`}
+                        >
+                          <Clock4 className="size-3.5 hidden md:block" />
+                          <p className="w-max">
+                            {task.dueDate
+                              ? `${new Intl.DateTimeFormat("en-GB", {
+                                  timeZone: "Africa/Cairo",
+                                  day: "2-digit",
+                                  month: "short",
+                                }).format(new Date(task.dueDate))}`
+                              : "No due date"}
+                          </p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="w-max">
+                          <span
+                            className={`text-[12.5px] items-center gap-1.5 py-[5px] px-1.5 rounded ${
+                              taskState === "Done"
+                                ? "bg-green-100 text-green-950"
+                                : taskState === "Pending"
+                                  ? "bg-yellow-100 text-yellow-950"
+                                  : "bg-blue-100 text-blue-950"
+                            }`}
+                          >
+                            {taskState}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="pl-8 py-2">
+                        <Checkbox
+                          id={`task-${task._id}`}
+                          checked={task.isCompleted}
+                          className="size-6 rounded-none"
+                          onClick={(e) => e.stopPropagation()}
+                          onCheckedChange={() => toggleCompletion(task)}
+                        />
+                      </TableCell>
+                      <TableCell className="px-4 py-2">
+                        <Button size="sm" onClick={() => setSelectedTask(task)}>
+                          Edit
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </ScrollArea>
+          </div>
+        </div>
+      );
+    });
+  };
+
+  const renderBoardView = () => {
+    return sortedTasks.map((task) => {
+      const taskState = getTaskState(task);
+
+      return (
+        <div
+          key={task._id}
+          className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"
+        >
+          {sortedTasks.map((task) => (
+            <div
+              key={task._id}
+              className="flex flex-col gap-3 p-4 rounded-sm shadow-sm border bg-[#f7f8f9]"
+            >
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-medium">{task.name}</h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedTask(task)}
+                >
+                  <MoreHorizontal />
+                </Button>
+              </div>
+              {task.tags && task.tags.length > 0 && (
+                <div className="w-full flex p-1 px-[1.25px] rounded shadow-sm border bg-white">
+                  {task.tags.map((tag, index) => {
+                    const bgColors = [
+                      "bg-red-200 text-red-950",
+                      "bg-blue-200 text-blue-950",
+                      "bg-emerald-200 text-emerald-950",
+                    ];
+
+                    const bgColor = bgColors[index % bgColors.length];
+                    return (
+                      <span
+                        key={index}
+                        className={`w-1/3 text-center text-xs mx-0.5 p-1 px-1.5 rounded ${bgColor}`}
+                      >
+                        {tag}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+              <div>
+                <p className="text-gray-600 truncate max-w-[500px]">
+                  {task.description ? task.description : "No Description"}
+                </p>
+              </div>
+              <div className="flex items-center gap-1.5 sm:gap-3 text-gray-600">
+                <CalendarClock className="size-5" />
+                <p className="text-sm md:text-base">
+                  Created at : {formatDate(task.createdAt)}
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <p className="text-sm sm:text-base font-medium text-gray-700 bg-gray-200 p-1 px-1.5 rounded">
                     {task.subtasks?.length || 0} Subtasks
-                  </TableCell>
-                  <TableCell className="px-4 py-2">{task.category}</TableCell>
-                  <TableCell className="px-4 py-2">
-                    <span
-                      className={`px-2 py-1 rounded text-xs ${
-                        task.priority === "high"
-                          ? "bg-red-200 text-red-950"
-                          : task.priority === "medium"
-                            ? "bg-yellow-200 text-yellow-800"
-                            : "bg-green-200 text-green-950"
-                      }`}
-                    >
-                      {task.priority.charAt(0).toUpperCase() +
-                        task.priority.slice(1)}
-                    </span>
-                  </TableCell>
-                  <TableCell className="px-4 py-2">
+                  </p>
+                </div>
+                <div className="flex items-center gap-1">
+                  {(() => {
+                    const customCategoryMatch = task.category.match(
+                      /^(.*) \((#[A-Fa-f0-9]{6})\)$/
+                    );
+                    const categoryName = customCategoryMatch
+                      ? customCategoryMatch[1]
+                      : task.category;
+                    const categoryColor = customCategoryMatch
+                      ? customCategoryMatch[2]
+                      : categoryColors[task.category] || "#6b7280";
+                    return (
+                      <>
+                        <Square
+                          className={`size-6 fill-[${categoryColor}] stroke-none`}
+                          style={{ fill: categoryColor }}
+                        />
+                        <p className="text-sm sm:text-base font-medium text-gray-600">
+                          {categoryName}
+                        </p>
+                      </>
+                    );
+                  })()}
+                </div>
+              </div>
+              <div className="flex items-center gap-3 mt-auto">
+                <Label className="text-gray-600">Task status : </Label>
+                <Checkbox
+                  id={`task-${task._id}`}
+                  checked={task.isCompleted}
+                  className="size-6 rounded-none"
+                  onClick={(e) => e.stopPropagation()}
+                  onCheckedChange={() => toggleCompletion(task)}
+                />
+
+                <span
+                  className={`text-[12.5px] items-center gap-1.5 py-[5px] px-1.5 rounded ${
+                    taskState === "Done"
+                      ? "bg-green-100 text-green-950"
+                      : taskState === "Pending"
+                        ? "bg-yellow-100 text-yellow-950"
+                        : "bg-blue-100 text-blue-950"
+                  }`}
+                >
+                  {taskState}
+                </span>
+              </div>
+              <div className="w-full flex items-center gap-1">
+                <p
+                  className={`block w-1/2 text-sm p-1 px-1.5 rounded ${
+                    task.priority === "high"
+                      ? "bg-red-200 text-red-950"
+                      : task.priority === "medium"
+                        ? "bg-yellow-200 text-yellow-800"
+                        : "bg-green-200 text-green-950"
+                  }`}
+                >
+                  {task.priority.charAt(0).toUpperCase() +
+                    task.priority.slice(1)}{" "}
+                  priority
+                </p>
+                <div
+                  className={`flex w-1/2 text-[12.5px] items-center gap-1.5 p-1 px-1.5 rounded ${
+                    task.dueDate
+                      ? (() => {
+                          const now = new Date();
+                          const dueDate = new Date(task.dueDate);
+                          const timeDiff = dueDate.getTime() - now.getTime();
+                          const hoursLeft = timeDiff / (1000 * 60 * 60);
+
+                          if (hoursLeft > 24)
+                            return "bg-green-200 text-green-950";
+                          if (hoursLeft <= 24 && hoursLeft > 12)
+                            return "bg-orange-200 text-orange-950";
+                          if (hoursLeft <= 12 && hoursLeft > 4)
+                            return "bg-orange-200 text-orange-950";
+                          if (hoursLeft <= 4) return "bg-red-200 text-red-950";
+                          return "bg-gray-200 text-gray-950";
+                        })()
+                      : "bg-gray-200 text-gray-950"
+                  }`}
+                >
+                  <Clock4 className="size-3.5" />
+                  <p>
                     {task.dueDate
                       ? `${new Intl.DateTimeFormat("en-GB", {
                           timeZone: "Africa/Cairo",
                           day: "2-digit",
                           month: "short",
                         }).format(new Date(task.dueDate))}`
-                      : "No Due Date"}
-                  </TableCell>
-                  <TableCell className="px-5 py-2">
-                    <Checkbox
-                      id={`task-${task._id}`}
-                      checked={task.isCompleted}
-                      className="size-6 rounded-none"
-                      onClick={(e) => e.stopPropagation()}
-                      onCheckedChange={() => toggleCompletion(task)}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <span
-                      className={`text-[12.5px] items-center gap-1.5 py-[5px] px-1.5 rounded ${
-                        task.isCompleted
-                          ? "bg-green-200 text-green-800"
-                          : "bg-yellow-200 text-yellow-800"
-                      }`}
-                    >
-                      {task.isCompleted ? "Done" : "Pending"}
-                    </span>
-                  </TableCell>
-                  <TableCell className="px-4 py-2">
-                    <Button size="sm" onClick={() => setSelectedTask(task)}>
-                      Edit
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </ScrollArea>
-      </div>
-    </div>
-  );
-
-  const renderBoardView = () => {
-    return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-        {sortedTasks.map((task) => (
-          <div
-            key={task._id}
-            className="flex flex-col gap-3 p-4 rounded-sm shadow-sm border bg-[#f7f8f9]"
-          >
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-medium">{task.name}</h2>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSelectedTask(task)}
-              >
-                <MoreHorizontal />
-              </Button>
-            </div>
-            {task.tags && task.tags.length > 0 && (
-              <div className="w-full flex p-1 px-[1.25px] rounded shadow-sm border bg-white">
-                {task.tags.map((tag, index) => {
-                  const bgColors = [
-                    "bg-red-200 text-red-950",
-                    "bg-blue-200 text-blue-950",
-                    "bg-emerald-200 text-emerald-950",
-                  ];
-
-                  const bgColor = bgColors[index % bgColors.length];
-                  return (
-                    <span
-                      key={index}
-                      className={`w-1/3 text-center text-xs mx-0.5 p-1 px-1.5 rounded ${bgColor}`}
-                    >
-                      {tag}
-                    </span>
-                  );
-                })}
-              </div>
-            )}
-            <div>
-              <p className="text-gray-600 truncate max-w-[200px]">
-                {task.description ? task.description : "No Description"}
-              </p>
-            </div>
-            <div className="flex items-center gap-1.5 sm:gap-3 text-gray-600">
-              <CalendarClock className="size-5" />
-              <p className="text-sm md:text-base">
-                Created at : {formatDate(task.createdAt)}
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <div className="flex items-center gap-1 sm:gap-2">
-                <p className="text-sm sm:text-base font-medium text-gray-700 bg-gray-200 p-1 px-1.5 rounded">
-                  {task.subtasks?.length || 0} Subtasks
-                </p>
-              </div>
-              <div className="flex items-center gap-1">
-                {(() => {
-                  const customCategoryMatch = task.category.match(
-                    /^(.*) \((#[A-Fa-f0-9]{6})\)$/
-                  );
-                  const categoryName = customCategoryMatch
-                    ? customCategoryMatch[1]
-                    : task.category;
-                  const categoryColor = customCategoryMatch
-                    ? customCategoryMatch[2]
-                    : categoryColors[task.category] || "#6b7280";
-                  return (
-                    <>
-                      <Square
-                        className={`size-6 fill-[${categoryColor}] stroke-none`}
-                        style={{ fill: categoryColor }}
-                      />
-                      <p className="text-sm sm:text-base font-medium text-gray-600">
-                        {categoryName}
-                      </p>
-                    </>
-                  );
-                })()}
+                      : "No due date"}
+                  </p>
+                </div>
               </div>
             </div>
-            <div className="w-full flex items-center gap-1">
-              <p
-                className={`hidden md:block w-1/2 text-sm p-1 px-1.5 rounded ${
-                  task.priority === "high"
-                    ? "bg-red-200 text-red-950"
-                    : task.priority === "medium"
-                      ? "bg-yellow-200 text-yellow-800"
-                      : "bg-green-200 text-green-950"
-                }`}
-              >
-                {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}{" "}
-                priority
-              </p>
-              <div
-                className={`hidden md:flex w-1/2 text-[12.5px] items-center gap-1.5 p-1 px-1.5 rounded ${
-                  task.dueDate
-                    ? (() => {
-                        const now = new Date();
-                        const dueDate = new Date(task.dueDate);
-                        const timeDiff = dueDate.getTime() - now.getTime();
-                        const hoursLeft = timeDiff / (1000 * 60 * 60);
-
-                        if (hoursLeft > 24)
-                          return "bg-green-200 text-green-950";
-                        if (hoursLeft <= 24 && hoursLeft > 12)
-                          return "bg-orange-200 text-orange-950";
-                        if (hoursLeft <= 12 && hoursLeft > 4)
-                          return "bg-orange-200 text-orange-950";
-                        if (hoursLeft <= 4) return "bg-red-200 text-red-950";
-                        return "bg-gray-200 text-gray-950";
-                      })()
-                    : "bg-gray-200 text-gray-950"
-                }`}
-              >
-                <Clock4 className="size-3.5" />
-                <p>
-                  {task.dueDate
-                    ? `${new Intl.DateTimeFormat("en-GB", {
-                        timeZone: "Africa/Cairo",
-                        day: "2-digit",
-                        month: "short",
-                      }).format(new Date(task.dueDate))}`
-                    : "No due date"}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 mt-auto">
-              <Label className="text-gray-600">Task status : </Label>
-              <Checkbox
-                id={`task-${task._id}`}
-                checked={task.isCompleted}
-                className="size-6 rounded-none"
-                onClick={(e) => e.stopPropagation()}
-                onCheckedChange={() => toggleCompletion(task)}
-              />
-              <span
-                className={`text-[12.5px] items-center gap-1.5 py-[5px] px-1.5 rounded ${
-                  task.isCompleted
-                    ? "bg-green-200 text-green-800"
-                    : "bg-yellow-200 text-yellow-800"
-                }`}
-              >
-                {task.isCompleted ? "Done" : "Pending"}
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
+          ))}
+        </div>
+      );
+    });
   };
 
   return (
@@ -666,7 +804,7 @@ export default function Today() {
                 <SelectItem value="default">
                   <span className="flex items-center gap-1.5">
                     <AlignJustify className="size-4" />
-                    Default
+                    List
                   </span>
                 </SelectItem>
                 <SelectItem value="table">
