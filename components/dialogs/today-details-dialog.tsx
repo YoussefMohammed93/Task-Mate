@@ -25,6 +25,7 @@ import React, { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AlertTriangle, CalendarDays, Loader, Plus, Trash } from "lucide-react";
+import { Label } from "../ui/label";
 
 const formatCairoTime = (date: Date) =>
   new Intl.DateTimeFormat("en-GB", {
@@ -262,16 +263,18 @@ export function TaskDetailsDialog({
   return (
     <>
       <Dialog open={!!task} onOpenChange={onClose}>
-        <DialogContent>
+        <DialogContent className="p-6 xl:max-w-4xl">
           <DialogHeader>
             <DialogTitle>Edit Task</DialogTitle>
           </DialogHeader>
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 mt-3">
+            <Label>Task name</Label>
             <Input
               placeholder="Task name"
               value={taskName}
               onChange={(e) => setTaskName(e.target.value)}
             />
+             <Label>Task description</Label>
             <Textarea
               placeholder="Task description"
               value={description}
@@ -390,7 +393,7 @@ export function TaskDetailsDialog({
               {tags.map((tag, index) => (
                 <div
                   key={index}
-                  className="flex items-center gap-3 bg-gray-200/70 px-3 py-1 rounded-full text-sm"
+                  className="flex items-center gap-3 bg-gray-200/70 px-3 py-1 rounded text-sm"
                 >
                   <p>{tag}</p>
                   <button
@@ -413,7 +416,7 @@ export function TaskDetailsDialog({
                   />
                   <Checkbox
                     checked={subtask.isCompleted}
-                    className="size-7 rounded-none"
+                    className="size-8 rounded-none"
                     onCheckedChange={() => handleSubtaskCompletionChange(index)}
                   />
                   <Button

@@ -185,7 +185,7 @@ export function TodayTaskDialog() {
           <Plus />
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="xl:max-w-4xl">
         <DialogHeader>
           <DialogTitle>Add a New Task</DialogTitle>
         </DialogHeader>
@@ -313,7 +313,7 @@ export function TodayTaskDialog() {
             {tags.map((tag, index) => (
               <div
                 key={index}
-                className="flex items-center gap-3 bg-gray-200/70 px-3 py-1 rounded-full text-sm"
+                className="flex items-center gap-3 bg-gray-200/70 px-3 py-1 rounded text-sm"
               >
                 <p>{tag}</p>
                 <button
