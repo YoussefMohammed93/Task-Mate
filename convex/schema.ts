@@ -23,6 +23,25 @@ export default defineSchema({
     dueTime: v.optional(v.string()),
   }).index("by_user", ["userId"]),
 
+  stickyNotes: defineTable({
+    name: v.string(),
+    description: v.string(),
+    color: v.string(),
+    icon: v.string(),
+    userId: v.string(),
+    createdAt: v.number(),
+    lastModified: v.number(),
+    position: v.object({
+      x: v.number(),
+      y: v.number(),
+      order: v.number(),
+    }),
+    columnId: v.string(),
+    isPinned: v.optional(v.boolean()),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_and_column", ["userId", "columnId", "position.order"]),
+
   pomodoro: defineTable({
     name: v.string(),
     userId: v.string(),

@@ -1,8 +1,6 @@
 "use client";
 
 import {
-  CalendarDays,
-  ChevronsRight,
   Clock1,
   ListChecks,
   LogOut,
@@ -50,26 +48,14 @@ export const Sidebar = () => {
             toggleSidebar={toggleSidebar}
           />
           <TaskItem
-            label="Upcoming"
-            path="/upcoming"
-            icon={ChevronsRight}
-            toggleSidebar={toggleSidebar}
-          />
-          <TaskItem
-            label="Calendar"
-            path="/calendar"
-            icon={CalendarDays}
-            toggleSidebar={toggleSidebar}
-          />
-          <TaskItem
             label="Pomodoro"
             path="/pomodoro"
             icon={Clock1}
             toggleSidebar={toggleSidebar}
           />
           <TaskItem
-            label="Sticky Wall"
-            path="/sticky-wall"
+            label="Sticky Notes"
+            path="/sticky-notes"
             icon={NotepadText}
             toggleSidebar={toggleSidebar}
           />
