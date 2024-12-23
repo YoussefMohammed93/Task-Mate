@@ -22,7 +22,7 @@ export const Sidebar = () => {
 
   return (
     <div
-      className={`fixed h-screen transition-all z-50 duration-300 overflow-hidden bg-gray-100 ${
+      className={`fixed h-screen transition-all z-50 duration-300 overflow-hidden bg-gray-100 dark:bg-[#242424] ${
         isSidebarVisible ? "w-0" : "w-full absolute"
       } md:w-[220px] lg:w-[300px] flex flex-col`}
     >

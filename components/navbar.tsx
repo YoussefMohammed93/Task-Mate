@@ -17,7 +17,7 @@ const Navbar = () => {
   const { user } = useUser();
 
   return (
-    <div className="w-full flex fixed z-40 items-center justify-between py-2.5 px-5 border-b bg-gray-100">
+    <div className="w-full flex fixed z-40 items-center justify-between py-2.5 px-5 border-b bg-gray-100 dark:bg-[#242424]">
       <button onClick={toggleSidebar} className="md:hidden">
         <Menu />
       </button>

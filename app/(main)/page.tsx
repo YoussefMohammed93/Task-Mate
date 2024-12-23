@@ -227,10 +227,10 @@ export default function Today() {
               <p
                 className={`hidden md:block text-sm ml-2 p-1 px-1.5 rounded ${
                   task.priority === "high"
-                    ? "bg-red-100 text-red-950"
+                    ? "bg-red-100 text-red-950 dark:bg-red-800 dark:text-white"
                     : task.priority === "medium"
-                      ? "bg-orange-100 text-orange-950"
-                      : "bg-green-100 text-green-950"
+                      ? "bg-orange-100 text-orange-950 dark:bg-orange-800 dark:text-white"
+                      : "bg-green-100 text-green-950 dark:bg-green-800 dark:text-white"
                 }`}
               >
                 {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}{" "}
@@ -246,15 +246,16 @@ export default function Today() {
                         const hoursLeft = timeDiff / (1000 * 60 * 60);
 
                         if (hoursLeft > 24)
-                          return "bg-green-100 text-green-950";
+                          return "bg-green-100 text-green-950 dark:bg-green-800 dark:text-white";
                         if (hoursLeft <= 24 && hoursLeft > 12)
-                          return "bg-orange-100 text-orange-950";
+                          return "bg-orange-100 text-orange-950 dark:bg-orange-800 dark:text-white";
                         if (hoursLeft <= 12 && hoursLeft > 4)
-                          return "bg-orange-100 text-orange-950";
-                        if (hoursLeft <= 4) return "bg-red-100 text-red-950";
-                        return "bg-gray-100 text-gray-950";
+                          return "bg-orange-100 text-orange-950 dark:bg-orange-800 dark:text-white";
+                        if (hoursLeft <= 4)
+                          return "bg-red-100 text-red-950 dark:bg-red-800 dark:text-white";
+                        return "bg-gray-100 text-gray-950 dark:bg-gray-800 dark:text-white";
                       })()
-                    : "bg-gray-100 text-gray-950"
+                    : "bg-gray-100 text-gray-950 dark:bg-gray-800 dark:text-white"
                 }`}
               >
                 <Clock4 className="size-3.5" />
@@ -272,10 +273,10 @@ export default function Today() {
                 <span
                   className={`text-[12.5px] items-center gap-1.5 py-[5px] px-1.5 rounded ${
                     taskState === "Done"
-                      ? "bg-green-100 text-green-950"
+                      ? "bg-green-100 text-green-950 dark:bg-green-800 dark:text-white"
                       : taskState === "Pending"
-                        ? "bg-yellow-100 text-yellow-950"
-                        : "bg-blue-100 text-blue-950"
+                        ? "bg-yellow-100 text-yellow-950 dark:bg-yellow-800 dark:text-white"
+                        : "bg-blue-100 text-blue-950 dark:bg-blue-800 dark:text-white"
                   }`}
                 >
                   {taskState}
@@ -312,7 +313,7 @@ export default function Today() {
                           className={`size-6 fill-[${categoryColor}] stroke-none`}
                           style={{ fill: categoryColor }}
                         />
-                        <p className="text-sm sm:text-base font-medium text-zinc-600">
+                        <p className="text-sm sm:text-base font-medium text-muted-foreground">
                           {categoryName}
                         </p>
                       </>
@@ -323,9 +324,9 @@ export default function Today() {
               <div className="flex flex-wrap relative right-1">
                 {task.tags?.map((tag, index) => {
                   const bgColors = [
-                    "bg-red-100 text-red-950",
-                    "bg-emerald-100 text-emerald-950",
-                    "bg-purple-100 text-purple-950",
+                    "bg-red-200 text-red-950 dark:bg-red-800 dark:text-white",
+                    "bg-emerald-200 text-emerald-950 dark:bg-emerald-800 dark:text-white",
+                    "bg-purple-200 text-purple-950 dark:bg-purple-800 dark:text-white",
                   ];
                   const bgColor = bgColors[index % bgColors.length];
 
@@ -343,10 +344,10 @@ export default function Today() {
                 <p
                   className={`block md:hidden text-sm p-1 px-1.5 rounded ${
                     task.priority === "high"
-                      ? "bg-red-100 text-red-950"
+                      ? "bg-red-100 text-red-950 dark:bg-red-800 dark:text-white"
                       : task.priority === "medium"
-                        ? "bg-orange-100 text-orange-950"
-                        : "bg-green-100 text-green-950"
+                        ? "bg-orange-100 text-orange-950 dark:bg-orange-800 dark:text-white"
+                        : "bg-green-100 text-green-950 dark:bg-green-800 dark:text-white"
                   }`}
                 >
                   {task.priority.charAt(0).toUpperCase() +
@@ -363,15 +364,16 @@ export default function Today() {
                           const hoursLeft = timeDiff / (1000 * 60 * 60);
 
                           if (hoursLeft > 24)
-                            return "bg-green-100 text-green-950";
+                            return "bg-green-100 text-green-950 dark:bg-green-800 dark:text-white";
                           if (hoursLeft <= 24 && hoursLeft > 12)
-                            return "bg-orange-100 text-orange-950";
+                            return "bg-orange-100 text-orange-950 dark:bg-orange-800 dark:text-white";
                           if (hoursLeft <= 12 && hoursLeft > 4)
-                            return "bg-orange-100 text-orange-950";
-                          if (hoursLeft <= 4) return "bg-red-100 text-red-950";
-                          return "bg-gray-100 text-gray-950";
+                            return "bg-orange-100 text-orange-950 dark:bg-orange-800 dark:text-white";
+                          if (hoursLeft <= 4)
+                            return "bg-red-100 text-red-950 dark:";
+                          return "bg-gray-100 text-gray-950 dark:bg-gray-800 dark:text-white";
                         })()
-                      : "bg-gray-100 text-gray-950"
+                      : "bg-gray-100 text-gray-950 dark:bg-gray-800 dark:text-white"
                   }`}
                 >
                   <Clock4 className="size-3.5" />
@@ -395,197 +397,188 @@ export default function Today() {
   };
 
   const renderTableView = () => {
-    return sortedTasks.map((task) => {
-      const taskState = getTaskState(task);
-      return (
-        <div key={task._id} className="w-full">
-          <div className="overflow-x-auto">
-            <ScrollArea className="w-full">
-              <Table className="table-auto w-full border border-gray-200">
-                <TableHeader className="bg-gray-100">
-                  <TableRow>
-                    <TableCell className="font-medium px-4 py-2">
-                      Task Name
+    return (
+      <div className="w-full overflow-x-auto">
+        <ScrollArea className="w-full">
+          <Table className="table-auto w-full">
+            <TableHeader className="bg-gray-100 dark:bg-[#2c2c2c]">
+              <TableRow>
+                <TableCell className="font-medium px-4 py-2">
+                  Task Name
+                </TableCell>
+                <TableCell className="font-medium px-4 py-2">Tags</TableCell>
+                <TableCell className="font-medium px-4 py-2">
+                  Description
+                </TableCell>
+                <TableCell className="font-medium px-4 py-2">
+                  Created At
+                </TableCell>
+                <TableCell className="font-medium px-4 py-2">
+                  Subtasks
+                </TableCell>
+                <TableCell className="font-medium px-4 py-2">
+                  Category
+                </TableCell>
+                <TableCell className="font-medium px-4 py-2">
+                  Priority
+                </TableCell>
+                <TableCell className="font-medium px-4 py-2">
+                  Due Date
+                </TableCell>
+                <TableCell className="font-medium px-4 py-2">Status</TableCell>
+                <TableCell className="font-medium px-4 py-2">
+                  Checkbox
+                </TableCell>
+                <TableCell className="font-medium px-4 py-2">Actions</TableCell>
+              </TableRow>
+            </TableHeader>
+            <TableBody className="dark:bg-[#171616]">
+              {sortedTasks.map((task) => {
+                const taskState = getTaskState(task);
+                return (
+                  <TableRow key={task._id}>
+                    <TableCell className="px-4 py-2 dark:text-white text-base">
+                      {task.name}
                     </TableCell>
-                    <TableCell className="font-medium px-4 py-2">
-                      Tags
+                    <TableCell className="px-4 py-2">
+                      {task.tags && task.tags.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {task.tags.map((tag, index) => {
+                            const bgColors = [
+                              "bg-red-200 text-red-950 dark:bg-red-800 dark:text-white",
+                              "bg-emerald-200 text-emerald-950 dark:bg-emerald-800 dark:text-white",
+                              "bg-purple-200 text-purple-950 dark:bg-purple-800 dark:text-white",
+                            ];
+                            const bgColor = bgColors[index % bgColors.length];
+                            return (
+                              <p
+                                key={index}
+                                className={`w-max px-2 py-1 rounded text-xs ${bgColor}`}
+                              >
+                                {tag}
+                              </p>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        "No Tags"
+                      )}
                     </TableCell>
-                    <TableCell className="font-medium px-4 py-2">
-                      Description
+                    <TableCell className="px-4 py-2 truncate max-w-[150px] dark:text-white">
+                      {task.description || "No Description"}
                     </TableCell>
-                    <TableCell className="font-medium px-4 py-2">
-                      Created At
+                    <TableCell className="px-4 py-2 dark:text-white">
+                      {formatDate(task.createdAt)}
                     </TableCell>
-                    <TableCell className="font-medium px-4 py-2">
-                      Subtasks
+                    <TableCell className="px-5 py-2">
+                      <p className="w-max dark:bg-[#363636] dark:text-white bg-gray-200 text-gray-800 rounded p-1 px-1.5">
+                        {task.subtasks?.length || 0} Subtasks
+                      </p>
                     </TableCell>
-                    <TableCell className="font-medium px-4 py-2">
-                      Category
+                    <TableCell className="px-4 py-2">
+                      <span className="w-max px-1.5 py-1 bg-sky-100 dark:bg-sky-800 dark:text-white text-sky-800 rounded">
+                        {task.category}
+                      </span>
                     </TableCell>
-                    <TableCell className="font-medium px-4 py-2">
-                      Priority
+                    <TableCell className="px-4 py-2">
+                      <span
+                        className={`px-2 py-1 rounded text-xs ${
+                          task.priority === "high"
+                            ? "bg-red-200 text-red-950 dark:bg-red-800 dark:text-white"
+                            : task.priority === "medium"
+                              ? "bg-yellow-200 text-yellow-800 dark:bg-yellow-800 dark:text-white"
+                              : "bg-green-200 text-green-950 dark:bg-green-800 dark:text-white"
+                        }`}
+                      >
+                        {task.priority.charAt(0).toUpperCase() +
+                          task.priority.slice(1)}
+                      </span>
                     </TableCell>
-                    <TableCell className="font-medium px-4 py-2">
-                      Due Date
+                    <TableCell className="px-4 py-2">
+                      <div
+                        className={`w-max flex text-[12px] items-center gap-1.5 p-1 px-1.5 rounded ${
+                          task.dueDate
+                            ? (() => {
+                                const now = new Date();
+                                const dueDate = new Date(task.dueDate);
+                                const timeDiff =
+                                  dueDate.getTime() - now.getTime();
+                                const hoursLeft = timeDiff / (1000 * 60 * 60);
+
+                                if (hoursLeft > 24)
+                                  return "bg-green-200 text-green-950 dark:bg-green-800 dark:text-white";
+                                if (hoursLeft <= 24 && hoursLeft > 12)
+                                  return "bg-orange-200 text-orange-950 dark:bg-orange-800 dark:text-white";
+                                if (hoursLeft <= 12 && hoursLeft > 4)
+                                  return "bg-orange-200 text-orange-950 dark:bg-orange-800 dark:text-white";
+                                if (hoursLeft <= 4)
+                                  return "bg-red-200 text-red-950 dark:bg-red-800 dark:text-white";
+                                return "bg-gray-200 text-gray-950 dark:bg-gray-800 dark:text-white";
+                              })()
+                            : "bg-gray-200 text-gray-950 dark:bg-gray-800 dark:text-white"
+                        }`}
+                      >
+                        <Clock4 className="size-3.5 hidden md:block" />
+                        <p className="w-max dark:text-white">
+                          {task.dueDate
+                            ? `${new Intl.DateTimeFormat("en-GB", {
+                                timeZone: "Africa/Cairo",
+                                day: "2-digit",
+                                month: "short",
+                              }).format(new Date(task.dueDate))}`
+                            : "No due date"}
+                        </p>
+                      </div>
                     </TableCell>
-                    <TableCell className="font-medium px-4 py-2">
-                      Status
+                    <TableCell>
+                      <div className="w-max">
+                        <span
+                          className={`text-[12.5px] items-center gap-1.5 py-[5px] px-1.5 rounded ${
+                            taskState === "Done"
+                              ? "bg-green-100 text-green-950 dark:bg-green-800 dark:text-white"
+                              : taskState === "Pending"
+                                ? "bg-yellow-100 text-yellow-950 dark:bg-yellow-800 dark:text-white"
+                                : "bg-blue-100 text-blue-950 dark:bg-blue-800 dark:text-white"
+                          }`}
+                        >
+                          {taskState}
+                        </span>
+                      </div>
                     </TableCell>
-                    <TableCell className="font-medium px-4 py-2">
-                      Checkbox
+                    <TableCell className="pl-8 py-2">
+                      <Checkbox
+                        id={`task-${task._id}`}
+                        checked={task.isCompleted}
+                        className="size-6 rounded-none"
+                        onClick={(e) => e.stopPropagation()}
+                        onCheckedChange={() => toggleCompletion(task)}
+                      />
                     </TableCell>
-                    <TableCell className="font-medium px-4 py-2">
-                      Actions
+                    <TableCell className="px-4 py-2">
+                      <Button size="sm" onClick={() => setSelectedTask(task)}>
+                        Edit
+                      </Button>
                     </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {sortedTasks.map((task) => (
-                    <TableRow key={task._id}>
-                      <TableCell className="px-4 py-2">{task.name}</TableCell>
-                      <TableCell className="px-4 py-2">
-                        {task.tags && task.tags.length > 0 ? (
-                          <div className="flex flex-wrap gap-1">
-                            {task.tags.map((tag, index) => {
-                              const bgColors = [
-                                "bg-red-200 text-red-950",
-                                "bg-emerald-200 text-emerald-950",
-                                "bg-purple-200 text-purple-950",
-                              ];
-                              const bgColor = bgColors[index % bgColors.length];
-                              return (
-                                <p
-                                  key={index}
-                                  className={`w-max px-2 py-1 rounded text-xs ${bgColor}`}
-                                >
-                                  {tag}
-                                </p>
-                              );
-                            })}
-                          </div>
-                        ) : (
-                          "No Tags"
-                        )}
-                      </TableCell>
-                      <TableCell className="px-4 py-2 truncate max-w-[150px]">
-                        {task.description || "No Description"}
-                      </TableCell>
-                      <TableCell className="px-4 py-2">
-                        {formatDate(task.createdAt)}
-                      </TableCell>
-                      <TableCell className="px-5 py-2">
-                        <p className="w-max bg-gray-200 text-gray-800 rounded p-1 px-1.5">
-                          {task.subtasks?.length || 0} Subtasks
-                        </p>
-                      </TableCell>
-                      <TableCell className="px-4 py-2">
-                        <span className="w-max px-1.5 py-1 bg-blue-100 text-blue-800 rounded">
-                          {task.category}
-                        </span>
-                      </TableCell>
-                      <TableCell className="px-4 py-2">
-                        <span
-                          className={`px-2 py-1 rounded text-xs ${
-                            task.priority === "high"
-                              ? "bg-red-200 text-red-950"
-                              : task.priority === "medium"
-                                ? "bg-yellow-200 text-yellow-800"
-                                : "bg-green-200 text-green-950"
-                          }`}
-                        >
-                          {task.priority.charAt(0).toUpperCase() +
-                            task.priority.slice(1)}
-                        </span>
-                      </TableCell>
-                      <TableCell className="px-4 py-2">
-                        <div
-                          className={`w-max flex text-[12px] items-center gap-1.5 p-1 px-1.5 rounded ${
-                            task.dueDate
-                              ? (() => {
-                                  const now = new Date();
-                                  const dueDate = new Date(task.dueDate);
-                                  const timeDiff =
-                                    dueDate.getTime() - now.getTime();
-                                  const hoursLeft = timeDiff / (1000 * 60 * 60);
-
-                                  if (hoursLeft > 24)
-                                    return "bg-green-200 text-green-950";
-                                  if (hoursLeft <= 24 && hoursLeft > 12)
-                                    return "bg-orange-200 text-orange-950";
-                                  if (hoursLeft <= 12 && hoursLeft > 4)
-                                    return "bg-orange-200 text-orange-950";
-                                  if (hoursLeft <= 4)
-                                    return "bg-red-200 text-red-950";
-                                  return "bg-gray-200 text-gray-950";
-                                })()
-                              : "bg-gray-200 text-gray-950"
-                          }`}
-                        >
-                          <Clock4 className="size-3.5 hidden md:block" />
-                          <p className="w-max">
-                            {task.dueDate
-                              ? `${new Intl.DateTimeFormat("en-GB", {
-                                  timeZone: "Africa/Cairo",
-                                  day: "2-digit",
-                                  month: "short",
-                                }).format(new Date(task.dueDate))}`
-                              : "No due date"}
-                          </p>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="w-max">
-                          <span
-                            className={`text-[12.5px] items-center gap-1.5 py-[5px] px-1.5 rounded ${
-                              taskState === "Done"
-                                ? "bg-green-100 text-green-950"
-                                : taskState === "Pending"
-                                  ? "bg-yellow-100 text-yellow-950"
-                                  : "bg-blue-100 text-blue-950"
-                            }`}
-                          >
-                            {taskState}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="pl-8 py-2">
-                        <Checkbox
-                          id={`task-${task._id}`}
-                          checked={task.isCompleted}
-                          className="size-6 rounded-none"
-                          onClick={(e) => e.stopPropagation()}
-                          onCheckedChange={() => toggleCompletion(task)}
-                        />
-                      </TableCell>
-                      <TableCell className="px-4 py-2">
-                        <Button size="sm" onClick={() => setSelectedTask(task)}>
-                          Edit
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </ScrollArea>
-          </div>
-        </div>
-      );
-    });
+                );
+              })}
+            </TableBody>
+          </Table>
+        </ScrollArea>
+      </div>
+    );
   };
 
   const renderBoardView = () => {
-    return sortedTasks.map((task) => {
-      const taskState = getTaskState(task);
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+        {sortedTasks.map((task) => {
+          const taskState = getTaskState(task);
 
-      return (
-        <div
-          key={task._id}
-          className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"
-        >
-          {sortedTasks.map((task) => (
+          return (
             <div
               key={task._id}
-              className="flex flex-col gap-3 p-4 rounded-sm shadow-sm border bg-[#f7f8f9]"
+              className="flex flex-col gap-3 p-4 rounded-sm shadow-sm border bg-[#f7f8f9] dark:bg-[#171616]"
             >
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-medium">{task.name}</h2>
@@ -598,12 +591,12 @@ export default function Today() {
                 </Button>
               </div>
               {task.tags && task.tags.length > 0 && (
-                <div className="w-full flex p-1 px-[1.25px] rounded shadow-sm border bg-white">
+                <div className="w-full flex p-1 px-[1.25px] rounded shadow-sm border bg-white dark:bg-[#2c2c2c] dark:border-[#2c2c2c]">
                   {task.tags.map((tag, index) => {
                     const bgColors = [
-                      "bg-red-200 text-red-950",
-                      "bg-blue-200 text-blue-950",
-                      "bg-emerald-200 text-emerald-950",
+                      "bg-red-200 text-red-950 dark:bg-red-800 dark:text-white",
+                      "bg-emerald-200 text-emerald-950 dark:bg-emerald-800 dark:text-white",
+                      "bg-purple-200 text-purple-950 dark:bg-purple-800 dark:text-white",
                     ];
 
                     const bgColor = bgColors[index % bgColors.length];
@@ -619,11 +612,11 @@ export default function Today() {
                 </div>
               )}
               <div>
-                <p className="text-gray-600 truncate max-w-[500px]">
+                <p className="text-muted-foreground truncate max-w-[500px]">
                   {task.description ? task.description : "No Description"}
                 </p>
               </div>
-              <div className="flex items-center gap-1.5 sm:gap-3 text-gray-600">
+              <div className="flex items-center gap-1.5 sm:gap-3 text-muted-foreground">
                 <CalendarClock className="size-5" />
                 <p className="text-sm md:text-base">
                   Created at : {formatDate(task.createdAt)}
@@ -631,7 +624,7 @@ export default function Today() {
               </div>
               <div className="flex gap-3">
                 <div className="flex items-center gap-1 sm:gap-2">
-                  <p className="text-sm sm:text-base font-medium text-gray-700 bg-gray-200 p-1 px-1.5 rounded">
+                  <p className="text-sm sm:text-base font-medium text-muted-foreground dark:bg-[#363636] bg-gray-200 p-1 px-1.5 rounded">
                     {task.subtasks?.length || 0} Subtasks
                   </p>
                 </div>
@@ -652,7 +645,7 @@ export default function Today() {
                           className={`size-6 fill-[${categoryColor}] stroke-none`}
                           style={{ fill: categoryColor }}
                         />
-                        <p className="text-sm sm:text-base font-medium text-gray-600">
+                        <p className="text-sm sm:text-base font-medium text-muted-foreground">
                           {categoryName}
                         </p>
                       </>
@@ -661,7 +654,7 @@ export default function Today() {
                 </div>
               </div>
               <div className="flex items-center gap-3 mt-auto">
-                <Label className="text-gray-600">Task status : </Label>
+                <Label className="text-muted-foreground">Task status : </Label>
                 <Checkbox
                   id={`task-${task._id}`}
                   checked={task.isCompleted}
@@ -673,10 +666,10 @@ export default function Today() {
                 <span
                   className={`text-[12.5px] items-center gap-1.5 py-[5px] px-1.5 rounded ${
                     taskState === "Done"
-                      ? "bg-green-100 text-green-950"
+                      ? "bg-green-100 text-green-950 dark:bg-green-800 dark:text-white"
                       : taskState === "Pending"
-                        ? "bg-yellow-100 text-yellow-950"
-                        : "bg-blue-100 text-blue-950"
+                        ? "bg-yellow-100 text-yellow-950 dark:bg-yellow-800 dark:text-white"
+                        : "bg-blue-100 text-blue-950 dark:bg-blue-800 dark:text-white"
                   }`}
                 >
                   {taskState}
@@ -686,10 +679,10 @@ export default function Today() {
                 <p
                   className={`block w-1/2 text-sm p-1 px-1.5 rounded ${
                     task.priority === "high"
-                      ? "bg-red-200 text-red-950"
+                      ? "bg-red-200 text-red-950 dark:bg-red-800 dark:text-white"
                       : task.priority === "medium"
-                        ? "bg-yellow-200 text-yellow-800"
-                        : "bg-green-200 text-green-950"
+                        ? "bg-yellow-200 text-yellow-800 dark:bg-yellow-800 dark:text-white"
+                        : "bg-green-200 text-green-950 dark:bg-green-800 dark:text-white"
                   }`}
                 >
                   {task.priority.charAt(0).toUpperCase() +
@@ -706,15 +699,16 @@ export default function Today() {
                           const hoursLeft = timeDiff / (1000 * 60 * 60);
 
                           if (hoursLeft > 24)
-                            return "bg-green-200 text-green-950";
+                            return "bg-green-200 text-green-950 dark:bg-green-800 dark:text-white";
                           if (hoursLeft <= 24 && hoursLeft > 12)
-                            return "bg-orange-200 text-orange-950";
+                            return "bg-orange-200 text-orange-950 dark:bg-orange-800 dark:text-white";
                           if (hoursLeft <= 12 && hoursLeft > 4)
-                            return "bg-orange-200 text-orange-950";
-                          if (hoursLeft <= 4) return "bg-red-200 text-red-950";
-                          return "bg-gray-200 text-gray-950";
+                            return "bg-orange-200 text-orange-950 dark:bg-orange-800 dark:text-white";
+                          if (hoursLeft <= 4)
+                            return "bg-red-200 text-red-950 dark:bg-red-800 dark:text-white";
+                          return "bg-gray-200 text-gray-950 dark:bg-gray-800 dark:text-white";
                         })()
-                      : "bg-gray-200 text-gray-950"
+                      : "bg-gray-200 text-gray-950 dark:bg-gray-800 dark:text-white"
                   }`}
                 >
                   <Clock4 className="size-3.5" />
@@ -730,10 +724,10 @@ export default function Today() {
                 </div>
               </div>
             </div>
-          ))}
-        </div>
-      );
-    });
+          );
+        })}
+      </div>
+    );
   };
 
   return (

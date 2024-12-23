@@ -178,192 +178,194 @@ export function TodayTaskDialog() {
   };
 
   return (
-    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline">
-          Add new task
-          <Plus />
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="xl:max-w-4xl">
-        <DialogHeader>
-          <DialogTitle>Add a New Task</DialogTitle>
-        </DialogHeader>
-        <div className="flex flex-col gap-2 sm:gap-3">
-          <Input
-            placeholder="Task name"
-            value={taskName}
-            onChange={(e) => setTaskName(e.target.value)}
-          />
-          <Textarea
-            placeholder="Task description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="resize-none"
-          />
-          <h3 className="font-medium">Category</h3>
-          <Select
-            onValueChange={(value) => {
-              if (value === "Custom") {
-                setUseCustomCategory(true);
-              } else {
-                setCategory(value);
-                setUseCustomCategory(false);
-              }
-            }}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select a category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Work">Work</SelectItem>
-              <SelectItem value="Sport">Sport</SelectItem>
-              <SelectItem value="Reading">Reading</SelectItem>
-              <SelectItem value="Learning">Learning</SelectItem>
-              <SelectItem value="Worship">Worship</SelectItem>
-              <SelectItem value="Custom">Custom</SelectItem>
-            </SelectContent>
-          </Select>
-          {useCustomCategory && (
-            <div className="w-full flex flex-col md:flex-row gap-2 sm:gap-5">
-              <div className="md:w-3/4">
-                <Input
-                  placeholder="Custom category name"
-                  value={customCategoryName}
-                  onChange={(e) => setCustomCategoryName(e.target.value)}
-                />
-              </div>
-              <div className="md:w-1/4 flex items-center gap-2">
-                <label htmlFor="color" className="font-medium">
-                  Category Color
-                </label>
-                <Input
-                  type="color"
-                  id="color"
-                  className="w-8 h-8 p-0 rounded-none shadow-none border-none cursor-pointer"
-                  value={customCategoryColor}
-                  onChange={(e) => setCustomCategoryColor(e.target.value)}
-                />
-              </div>
-            </div>
-          )}
-          <div>
-            <Button
-              variant="outline"
-              onClick={() => setDueDateDialogOpen(true)}
-            >
-              Set Due Date <CalendarDays />
-            </Button>
-            {dueDate && (
-              <p className="mt-2 text-muted-foreground">
-                <span>Due Date : </span>
-                {dueDate &&
-                  `${new Intl.DateTimeFormat("en-GB", {
-                    timeZone: "Africa/Cairo",
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                  }).format(new Date(dueDate))} at ${new Date(
-                    `${new Date(dueDate).toDateString()} ${dueTime}`
-                  ).toLocaleTimeString("en-US", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: true,
-                    timeZone: "Africa/Cairo",
-                  })}`}
-              </p>
-            )}
-          </div>
-          <div className="w-full flex gap-2">
-            <div className="w-1/4">
-              <h3 className="font-medium mb-1">Priority</h3>
-              <Select
-                onValueChange={(value) =>
-                  setPriority(value as "high" | "medium" | "low")
+    <>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogTrigger asChild>
+          <Button variant="default">
+            Add new task
+            <Plus />
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="xl:max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Add a New Task</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-2 sm:gap-3">
+            <Input
+              placeholder="Task name"
+              value={taskName}
+              onChange={(e) => setTaskName(e.target.value)}
+            />
+            <Textarea
+              placeholder="Task description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="resize-none"
+            />
+            <h3 className="font-medium">Category</h3>
+            <Select
+              onValueChange={(value) => {
+                if (value === "Custom") {
+                  setUseCustomCategory(true);
+                } else {
+                  setCategory(value);
+                  setUseCustomCategory(false);
                 }
+              }}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Work">Work</SelectItem>
+                <SelectItem value="Sport">Sport</SelectItem>
+                <SelectItem value="Reading">Reading</SelectItem>
+                <SelectItem value="Learning">Learning</SelectItem>
+                <SelectItem value="Worship">Worship</SelectItem>
+                <SelectItem value="Custom">Custom</SelectItem>
+              </SelectContent>
+            </Select>
+            {useCustomCategory && (
+              <div className="w-full flex flex-col md:flex-row gap-2 sm:gap-5">
+                <div className="md:w-3/4">
+                  <Input
+                    placeholder="Custom category name"
+                    value={customCategoryName}
+                    onChange={(e) => setCustomCategoryName(e.target.value)}
+                  />
+                </div>
+                <div className="md:w-1/4 flex items-center gap-2">
+                  <label htmlFor="color" className="font-medium">
+                    Category Color
+                  </label>
+                  <Input
+                    type="color"
+                    id="color"
+                    className="w-8 h-8 p-0 rounded-none shadow-none border-none cursor-pointer"
+                    value={customCategoryColor}
+                    onChange={(e) => setCustomCategoryColor(e.target.value)}
+                  />
+                </div>
+              </div>
+            )}
+            <div>
+              <Button
+                variant="outline"
+                onClick={() => setDueDateDialogOpen(true)}
               >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select priority" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="high">High</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="low">Low</SelectItem>
-                </SelectContent>
-              </Select>
+                Set Due Date <CalendarDays />
+              </Button>
+              {dueDate && (
+                <p className="mt-2 text-muted-foreground">
+                  <span>Due Date : </span>
+                  {dueDate &&
+                    `${new Intl.DateTimeFormat("en-GB", {
+                      timeZone: "Africa/Cairo",
+                      year: "numeric",
+                      month: "2-digit",
+                      day: "2-digit",
+                    }).format(new Date(dueDate))} at ${new Date(
+                      `${new Date(dueDate).toDateString()} ${dueTime}`
+                    ).toLocaleTimeString("en-US", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: true,
+                      timeZone: "Africa/Cairo",
+                    })}`}
+                </p>
+              )}
             </div>
-            <div className="w-3/4">
-              <h3 className="font-medium mb-1">Tags</h3>
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Add a tag"
-                  value={newTag}
-                  onChange={(e) => setNewTag(e.target.value)}
-                />
-                <Button
-                  onClick={handleAddTag}
-                  disabled={tags.length >= 3 || !newTag.trim()}
+            <div className="w-full flex gap-2">
+              <div className="w-1/4">
+                <h3 className="font-medium mb-1">Priority</h3>
+                <Select
+                  onValueChange={(value) =>
+                    setPriority(value as "high" | "medium" | "low")
+                  }
                 >
-                  Add Tag
-                </Button>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select priority" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="w-3/4">
+                <h3 className="font-medium mb-1">Tags</h3>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Add a tag"
+                    value={newTag}
+                    onChange={(e) => setNewTag(e.target.value)}
+                  />
+                  <Button
+                    onClick={handleAddTag}
+                    disabled={tags.length >= 3 || !newTag.trim()}
+                  >
+                    Add Tag
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {tags.map((tag, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-3 bg-gray-200/70 px-3 py-1 rounded text-sm"
-              >
-                <p>{tag}</p>
-                <button
-                  onClick={() => handleRemoveTag(index)}
-                  className="text-destructive"
+            <div className="flex flex-wrap gap-2">
+              {tags.map((tag, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-3 dark:bg-[#27272a] bg-gray-200/70 px-3 py-1 rounded text-sm"
                 >
-                  <Trash size={18} />
-                </button>
-              </div>
-            ))}
-          </div>
-          <h3 className="font-medium">Subtasks</h3>
-          <div className="flex flex-col sm:flex-row gap-2">
-            {subtasks.map((subtask, index) => (
-              <div key={index} className="w-full flex gap-2 items-center">
-                <Input
-                  placeholder={`Subtask ${index + 1}`}
-                  value={subtask.title}
-                  onChange={(e) => handleSubtaskChange(index, e.target.value)}
-                />
-                <Button
-                  variant="destructive"
-                  className="px-4"
-                  size="icon"
-                  onClick={() => handleRemoveSubtask(index)}
-                >
-                  <Trash size={16} />
-                </Button>
-              </div>
-            ))}
-          </div>
-          <Button
-            variant="secondary"
-            className="border border-gray-300"
-            onClick={handleAddSubtask}
-          >
-            Add Subtask <Plus />
-          </Button>
-          {error && (
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="size-5 text-destructive" />
-              <span className="text-destructive text-sm">{error}</span>
+                  <p>{tag}</p>
+                  <button
+                    onClick={() => handleRemoveTag(index)}
+                    className="text-destructive"
+                  >
+                    <Trash size={18} />
+                  </button>
+                </div>
+              ))}
             </div>
-          )}
-          <Button onClick={handleAddTask}>
-            Add Task <Plus />
-          </Button>
-        </div>
-      </DialogContent>
-      {dueDateDialogOpen && (
+            <h3 className="font-medium">Subtasks</h3>
+            <div className="flex flex-col sm:flex-row gap-2">
+              {subtasks.map((subtask, index) => (
+                <div key={index} className="w-full flex gap-2 items-center">
+                  <Input
+                    placeholder={`Subtask ${index + 1}`}
+                    value={subtask.title}
+                    onChange={(e) => handleSubtaskChange(index, e.target.value)}
+                  />
+                  <Button
+                    variant="destructive"
+                    className="px-4"
+                    size="icon"
+                    onClick={() => handleRemoveSubtask(index)}
+                  >
+                    <Trash size={16} />
+                  </Button>
+                </div>
+              ))}
+            </div>
+            <Button
+              variant="secondary"
+              className="border border-gray-300 dark:border-none"
+              onClick={handleAddSubtask}
+            >
+              Add Subtask <Plus />
+            </Button>
+            {error && (
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="size-5 text-destructive" />
+                <span className="text-destructive text-sm">{error}</span>
+              </div>
+            )}
+            <Button onClick={handleAddTask}>
+              Add Task <Plus />
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={dueDateDialogOpen} onOpenChange={setDueDateDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Set Due Date</DialogTitle>
@@ -383,6 +385,7 @@ export function TodayTaskDialog() {
               }}
               value={dueDate}
               minDate={new Date()}
+              className="dark:bg-[#121111]"
             />
             <div className="flex gap-2 items-center">
               <label htmlFor="time">Time:</label>
@@ -413,7 +416,7 @@ export function TodayTaskDialog() {
             <Button onClick={handleSaveDueDate}>Save</Button>
           </div>
         </DialogContent>
-      )}
-    </Dialog>
+      </Dialog>
+    </>
   );
 }

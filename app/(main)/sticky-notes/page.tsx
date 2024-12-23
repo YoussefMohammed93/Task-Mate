@@ -205,7 +205,7 @@ export default function StickyNotes() {
   return (
     <div className="pb-8">
       <div className="flex justify-between items-center gap-5 px-5 md:px-0 md:pr-5 mb-7">
-        <h1 className="font-mono text-3xl sm:text-4xl font-semibold">
+        <h1 className="font-mono text-3xl sm:text-4xl font-semibold mt-1">
           Sticky Notes
         </h1>
         <Button onClick={() => setIsCreateDialogOpen(true)}>
@@ -327,7 +327,7 @@ export default function StickyNotes() {
                 <p className="mb-2 text-sm font-semibold">Select Color</p>
                 <CirclePicker
                   color={newNoteData.color}
-                  className="bg-gray-100 rounded-sm border border-gray-300 p-6"
+                  className="bg-gray-100 rounded-sm border border-gray-300 p-6 dark:border-gray-700 dark:bg-[#202020]"
                   styles={{ default: { card: { width: "80%" } } }}
                   onChangeComplete={(color) =>
                     setNewNoteData({ ...newNoteData, color: color.hex })
@@ -400,7 +400,7 @@ export default function StickyNotes() {
                 <p className="mb-2 text-sm font-semibold">Select Color</p>
                 <CirclePicker
                   color={editingNote.color}
-                  className="bg-gray-100 rounded-sm border border-gray-300 p-6"
+                  className="bg-gray-100 rounded-sm border border-gray-300 p-6 dark:border-gray-700 dark:bg-[#202020]"
                   styles={{ default: { card: { width: "80%" } } }}
                   onChangeComplete={(color) =>
                     setEditingNote({ ...editingNote, color: color.hex })

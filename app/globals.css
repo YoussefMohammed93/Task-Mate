@@ -43,10 +43,10 @@
     --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 0 0% 98%;
     --muted: 0 0% 15%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted-foreground: 240 5% 75%;
     --accent: 12 6.5% 15.1%;
     --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 72.5% 45%;
     --destructive-foreground: 0 85.7% 97.3%;
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
@@ -73,7 +73,7 @@
 }
 ::-webkit-scrollbar-track {
   border-radius: 100%;
-  background: white;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
   border-radius: 12px;
@@ -96,4 +96,49 @@
 
 td {
   border: 1px solid #e6e6e6;
+}
+
+.dark td {
+  border: 1px solid #363636;
+}
+
+.dark
+  .react-calendar__navigation__arrow.react-calendar__navigation__prev-button,
+.dark
+  .react-calendar__navigation__arrow.react-calendar__navigation__prev2-button,
+.dark .react-calendar__tile.react-calendar__month-view__days__day,
+.dark .react-calendar__navigation__label,
+.dark .react-calendar__tile.react-calendar__year-view__months__month {
+  background: #121111;
+}
+
+.dark .react-calendar__tile.react-calendar__month-view__days__day:hover {
+  background: #16a34a27;
+}
+
+.dark .react-calendar__tile.react-calendar__month-view__days__day:disabled {
+  background: #0c0c0c;
+}
+
+.dark
+  .react-calendar__navigation__arrow.react-calendar__navigation__next2-button:hover,
+.dark
+  .react-calendar__navigation__arrow.react-calendar__navigation__next-button:hover,
+.dark
+  .react-calendar__navigation__arrow.react-calendar__navigation__prev-button:hover,
+.dark
+  .react-calendar__navigation__arrow.react-calendar__navigation__prev2-button:hover,
+.dark .react-calendar__navigation button:enabled:hover,
+.dark .react-calendar__navigation button:enabled:focus,
+.dark .react-calendar__tile.react-calendar__year-view__months__month:hover {
+  background: #16a34a27;
+}
+
+.react-calendar__tile--active:enabled:hover,
+.react-calendar__tile--active:enabled:focus {
+  background: #16a34a !important;
+}
+
+.dark .CircularProgressbar-text {
+  fill: white !important;
 }

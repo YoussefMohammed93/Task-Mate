@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import Navbar from "@/components/navbar";
 import { Sidebar } from "@/components/sidebar";
 import { Geist, Geist_Mono } from "next/font/google";
+import { ThemeProvider } from "@/components/providers/theme-provider";
 import { SidebarProvider } from "@/components/contexts/sidebar-context";
 import { ConvexClientProvider } from "@/components/providers/convex-provider";
 
@@ -33,14 +34,21 @@ export default function RootLayout({
           <body
             className={`${geistSans.variable} ${geistMono.variable} antialiased`}
           >
-            <div className="flex">
-              <Sidebar />
-              <div className="flex-1">
-                <Navbar />
-                <main className="md:pl-60 lg:pl-80 pt-16">{children}</main>
+            <ThemeProvider
+              enableSystem
+              attribute="class"
+              defaultTheme="system"
+              disableTransitionOnChange
+            >
+              <div className="flex">
+                <Sidebar />
+                <div className="flex-1">
+                  <Navbar />
+                  <main className="md:pl-60 lg:pl-80 pt-16">{children}</main>
+                </div>
               </div>
-            </div>
-            <Toaster position="bottom-right" />
+              <Toaster position="bottom-right" />
+            </ThemeProvider>
           </body>
         </html>
       </SidebarProvider>

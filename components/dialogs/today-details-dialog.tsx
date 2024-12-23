@@ -290,10 +290,10 @@ export function TaskDetailsDialog({
               <span
                 className={`px-2 py-1 rounded text-sm ${
                   taskStatus === "Done"
-                    ? "bg-green-200 text-green-800"
+                    ? "bg-green-200 text-green-800 dark:bg-green-700 dark:text-green-100"
                     : taskStatus === "Pending"
-                      ? "bg-yellow-200 text-yellow-800"
-                      : "bg-blue-200 text-blue-800"
+                      ? "bg-yellow-200 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-100"
+                      : "bg-blue-200 text-blue-800 dark:bg-blue-700 dark:text-blue-100"
                 }`}
               >
                 {taskStatus}
@@ -426,7 +426,7 @@ export function TaskDetailsDialog({
               {tags.map((tag, index) => (
                 <div
                   key={index}
-                  className="flex items-center gap-3 bg-gray-200/70 px-3 py-1 rounded text-sm"
+                  className="flex items-center gap-3 dark:bg-[#27272a] bg-gray-200/70 px-3 py-1 rounded text-sm"
                 >
                   <p>{tag}</p>
                   <button
@@ -521,7 +521,8 @@ export function TaskDetailsDialog({
                 setDueDate(selectedDate);
               }}
               value={dueDate}
-              minDate={new Date()} // Restrict past dates
+              minDate={new Date()}
+              className="dark:bg-[#121111]"
             />
             <div className="flex items-center gap-2">
               <label htmlFor="time">Time:</label>

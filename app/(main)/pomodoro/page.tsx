@@ -236,7 +236,7 @@ export default function PomodoroPage() {
 
   return (
     <div className="h-[90vh] sm:h-auto flex flex-col items-center justify-center px-5">
-      <h1 className="flex gap-3 text-3xl sm:text-4xl font-bold font-mono">
+      <h1 className="flex gap-3 text-3xl sm:text-4xl font-bold font-mono mt-1">
         Pomodoro Timer
         <span>
           <HoverCard>
