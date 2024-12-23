@@ -114,10 +114,10 @@ export const stopPomodoroSession = mutation({
 
 export const deletePomodoroSessionAfterCompletion = mutation({
   args: { userId: v.string() },
-  handler: async (ctx, args) => {
+  handler: async (ctx, { userId }) => {
     const session = await ctx.db
       .query("pomodoro")
-      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .withIndex("by_user", (q) => q.eq("userId", userId))
       .first();
 
     if (session) {
@@ -127,6 +127,29 @@ export const deletePomodoroSessionAfterCompletion = mutation({
 
       if (elapsedTime >= totalTime) {
         await ctx.db.delete(session._id);
+
+        const progress = await ctx.db
+          .query("userProgress")
+          .withIndex("by_user", (q) => q.eq("userId", userId))
+          .first();
+
+        const newPoints = (progress?.points || 0) + 10;
+        const newLevel = Math.floor(newPoints / 100);
+
+        if (progress) {
+          await ctx.db.patch(progress._id, {
+            points: newPoints,
+            level: newLevel,
+            updatedAt: Date.now(),
+          });
+        } else {
+          await ctx.db.insert("userProgress", {
+            userId,
+            points: newPoints,
+            level: newLevel,
+            updatedAt: Date.now(),
+          });
+        }
       }
     }
   },

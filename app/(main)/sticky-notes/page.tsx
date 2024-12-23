@@ -1,24 +1,24 @@
 "use client";
 
-import { useState } from "react";
-import { X, Pin, PinOff, Plus, GripVertical } from "lucide-react";
-import { useQuery, useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import { Id } from "@/convex/_generated/dataModel";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogTitle,
   DialogContent,
   DialogOverlay,
 } from "@/components/ui/dialog";
-import { CirclePicker } from "react-color";
-import Picker from "@emoji-mart/react";
+import { useState } from "react";
 import data from "@emoji-mart/data";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import Picker from "@emoji-mart/react";
+import { CirclePicker } from "react-color";
 import { Input } from "@/components/ui/input";
+import { api } from "@/convex/_generated/api";
+import { Button } from "@/components/ui/button";
+import { Id } from "@/convex/_generated/dataModel";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useQuery, useMutation } from "convex/react";
+import { X, Pin, PinOff, Plus, GripVertical } from "lucide-react";
 
 interface Note {
   _id: Id<"stickyNotes">;

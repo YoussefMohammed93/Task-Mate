@@ -16,6 +16,7 @@ import type {
 import type * as pomodoro from "../pomodoro.js";
 import type * as sticky_notes from "../sticky_notes.js";
 import type * as today from "../today.js";
+import type * as user_progress from "../user_progress.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -29,6 +30,7 @@ declare const fullApi: ApiFromModules<{
   pomodoro: typeof pomodoro;
   sticky_notes: typeof sticky_notes;
   today: typeof today;
+  user_progress: typeof user_progress;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,

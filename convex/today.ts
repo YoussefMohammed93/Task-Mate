@@ -166,6 +166,50 @@ export const update = mutation({
       updates.createdAt = Date.now();
     }
 
+    if (isCompleted !== undefined && task.isCompleted !== isCompleted) {
+      const progress = await ctx.db
+        .query("userProgress")
+        .withIndex("by_user", (q) => q.eq("userId", identity.subject))
+        .first();
+
+      let newPoints = progress?.points || 0;
+
+      if (isCompleted) {
+        newPoints += 10;
+        await ctx.db.insert("userProgressLogs", {
+          userId: identity.subject,
+          description: `Completed task: ${task.name}`,
+          points: 10,
+          timestamp: Date.now(),
+        });
+      } else {
+        newPoints = Math.max(newPoints - 10, 0);
+        await ctx.db.insert("userProgressLogs", {
+          userId: identity.subject,
+          description: `Uncompleted task: ${task.name}`,
+          points: -10,
+          timestamp: Date.now(),
+        });
+      }
+
+      const newLevel = calculateLevel(newPoints).level;
+
+      if (progress) {
+        await ctx.db.patch(progress._id, {
+          points: newPoints,
+          level: newLevel,
+          updatedAt: Date.now(),
+        });
+      } else {
+        await ctx.db.insert("userProgress", {
+          userId: identity.subject,
+          points: newPoints,
+          level: newLevel,
+          updatedAt: Date.now(),
+        });
+      }
+    }
+
     return await ctx.db.patch(id, updates);
   },
 });
@@ -189,3 +233,20 @@ export const removeAll = mutation({
     return { success: true };
   },
 });
+
+function calculateLevel(points: number): { level: number } {
+  const basePoints = 20;
+  const increment = 10;
+
+  let level = 1;
+  let cumulativePoints = 0;
+  let nextLevelPoints = basePoints;
+
+  while (points >= cumulativePoints + nextLevelPoints) {
+    cumulativePoints += nextLevelPoints;
+    level++;
+    nextLevelPoints = basePoints + increment * (level - 1);
+  }
+
+  return { level };
+}

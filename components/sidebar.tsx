@@ -7,6 +7,7 @@ import {
   NotepadText,
   Search,
   Settings,
+  Trophy,
   XIcon,
 } from "lucide-react";
 import { useClerk } from "@clerk/clerk-react";
@@ -57,6 +58,12 @@ export const Sidebar = () => {
             label="Sticky Notes"
             path="/sticky-notes"
             icon={NotepadText}
+            toggleSidebar={toggleSidebar}
+          />
+          <TaskItem
+            label="Achievements"
+            path="/achievements"
+            icon={Trophy}
             toggleSidebar={toggleSidebar}
           />
         </div>
