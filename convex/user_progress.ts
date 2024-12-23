@@ -37,6 +37,22 @@ export const getUserProgress = query({
   },
 });
 
+export const getUserLogs = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Unauthenticated");
+    }
+
+    return await ctx.db
+      .query("userProgressLogs")
+      .withIndex("by_user", (q) => q.eq("userId", identity.subject))
+      .order("desc")
+      .take(10);
+  },
+});
+
 function calculateLevel(points: number): {
   level: number;
   progress: number;
@@ -60,19 +76,3 @@ function calculateLevel(points: number): {
 
   return { level, progress, requiredPoints };
 }
-
-export const getUserLogs = query({
-  args: {},
-  handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Unauthenticated");
-    }
-
-    return await ctx.db
-      .query("userProgressLogs")
-      .withIndex("by_user", (q) => q.eq("userId", identity.subject))
-      .order("desc")
-      .take(20);
-  },
-});
