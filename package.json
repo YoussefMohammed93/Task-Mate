@@ -9,10 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@clerk/nextjs": "^6.9.6",
     "convex": "^1.17.4",
     "next": "14.2.21",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "svix": "^1.44.0"
   },
   "devDependencies": {
     "@types/node": "^20",
