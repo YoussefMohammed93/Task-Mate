@@ -1,16 +1,14 @@
 "use client";
 
-import { useQuery } from "convex/react";
-import { Navbar } from "@/components/navbar";
-import { api } from "../../convex/_generated/api";
 import Image from "next/image";
+import { useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 
 export default function Main() {
   const user = useQuery(api.users.currentUser);
 
   return (
     <div className="container mx-auto max-w-7xl">
-      <Navbar />
       {user && (
         <div className="pt-5 space-y-5">
           <h1>
