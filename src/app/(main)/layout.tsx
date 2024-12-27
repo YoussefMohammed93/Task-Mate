@@ -14,7 +14,7 @@ export default function MainLayout({
           <Sidebar />
           <div className="flex-1">
             <Navbar />
-            <main className="p-5 md:pl-60 lg:pl-80 pt-12">{children}</main>
+            <main className="p-5 md:pl-60 lg:pl-80 pt-16">{children}</main>
           </div>
         </div>
       </SidebarProvider>
