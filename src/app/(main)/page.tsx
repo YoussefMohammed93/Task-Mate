@@ -844,7 +844,7 @@ export default function Tasks() {
           )
         )}
       </div>
-      <div className="p-5 pl-0">
+      <div className="py-5">
         {isLoading ? (
           Array.from({ length: 5 }).map((_, index) => (
             <div key={index}>

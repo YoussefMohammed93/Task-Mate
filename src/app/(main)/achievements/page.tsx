@@ -117,7 +117,7 @@ export default function AchievementsPage() {
               points, and stay motivated as you level up.
             </AccordionContent>
           </AccordionItem>
-          <AccordionItem value="q2">
+          <AccordionItem value="q2" className="border-b-0">
             <AccordionTrigger className="text-lg font-semibold">
               How are points calculated?
             </AccordionTrigger>
