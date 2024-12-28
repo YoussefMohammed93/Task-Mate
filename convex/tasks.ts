@@ -176,20 +176,8 @@ export const update = mutation({
 
       if (isCompleted) {
         newPoints += 10;
-        await ctx.db.insert("userProgressLogs", {
-          userId: identity.subject,
-          description: `Completed task: ${task.name}`,
-          points: 10,
-          timestamp: Date.now(),
-        });
       } else {
         newPoints = Math.max(newPoints - 10, 0);
-        await ctx.db.insert("userProgressLogs", {
-          userId: identity.subject,
-          description: `Uncompleted task: ${task.name}`,
-          points: -10,
-          timestamp: Date.now(),
-        });
       }
 
       const newLevel = calculateLevel(newPoints).level;
