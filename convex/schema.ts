@@ -74,11 +74,4 @@ export default defineSchema({
   })
     .index("by_user_id", ["userId"])
     .index("by_points", ["points"]),
-
-  userProgressLogs: defineTable({
-    userId: v.string(),
-    points: v.number(),
-    description: v.string(),
-    timestamp: v.number(),
-  }).index("by_user_id", ["userId"]),
 });

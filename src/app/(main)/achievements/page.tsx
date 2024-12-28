@@ -8,11 +8,33 @@ import {
 } from "@/components/ui/accordion";
 import { Loader } from "lucide-react";
 import { useQuery } from "convex/react";
+import { useState, useEffect } from "react";
 import { Progress } from "@/components/ui/progress";
 import { api } from "../../../../convex/_generated/api";
 
 export default function AchievementsPage() {
   const userProgress = useQuery(api.user_progress.getUserProgress);
+
+  const [motivationalSentences, setMotivationalSentences] = useState<string[]>(
+    []
+  );
+  const [randomMotivationalSentence, setRandomMotivationalSentence] =
+    useState<string>("");
+
+  useEffect(() => {
+    async function fetchMotivationalSentences() {
+      const response = await fetch("/motivational_sentences.json");
+      const data = await response.json();
+      setMotivationalSentences(data.motivational_sentences);
+      setRandomMotivationalSentence(
+        data.motivational_sentences[
+          Math.floor(Math.random() * data.motivational_sentences.length)
+        ]
+      );
+    }
+
+    fetchMotivationalSentences();
+  }, []);
 
   if (!userProgress) {
     return (
@@ -31,7 +53,7 @@ export default function AchievementsPage() {
           Achievements
         </h1>
         <div className="mt-5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             <div className="flex flex-col items-start gap-3 bg-[#f9f9f9] border dark:bg-secondary p-5 rounded-lg shadow-sm dark:border-zinc-700">
               <h2 className="text-xl font-bold">Level</h2>
               <p className="w-full text-7xl text-center font-bold text-primary">
@@ -71,7 +93,17 @@ export default function AchievementsPage() {
           </div>
         </div>
       </div>
-      <div className="mt-12 pb-6">
+      {motivationalSentences.length > 0 && (
+        <div className="flex flex-col items-center sm:items-start gap-3 bg-[#f9f9f9] border dark:bg-secondary p-5 rounded-lg shadow-sm dark:border-zinc-700">
+          <h1 className="font-mono text-3xl sm:text-4xl font-semibold pb-4">
+            Motivational Quote
+          </h1>
+          <p className="text-xl text-center font-semibold text-primary">
+            <q>{randomMotivationalSentence}</q>
+          </p>
+        </div>
+      )}
+      <div className="mt-6 pb-6">
         <h1 className="font-mono text-3xl sm:text-4xl font-semibold pb-2">
           FAQ
         </h1>
@@ -90,19 +122,7 @@ export default function AchievementsPage() {
               How are points calculated?
             </AccordionTrigger>
             <AccordionContent>
-              Points are calculated based on your activities and contributions.
-              Each action rewards a specific number of points, which contribute
-              to your level progress.
-            </AccordionContent>
-          </AccordionItem>
-          <AccordionItem value="q3">
-            <AccordionTrigger className="text-lg font-semibold">
-              How can I view more points history?
-            </AccordionTrigger>
-            <AccordionContent>
-              {
-                "Click the ' Show More ' button to expand the list and view additional point history entries."
-              }
+              For every task you complete, you get 10 points.
             </AccordionContent>
           </AccordionItem>
         </Accordion>
