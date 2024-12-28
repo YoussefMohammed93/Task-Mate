@@ -3,6 +3,7 @@
 import {
   Clock1,
   ListChecks,
+  LogOut,
   Medal,
   NotepadText,
   Search,
@@ -11,12 +12,19 @@ import {
   XIcon,
 } from "lucide-react";
 import SidebarItem from "./sidebar-item";
+import { useClerk } from "@clerk/clerk-react";
 import { useSearch } from "@/hooks/use-search";
 import { useSidebar } from "./contexts/sidebar-context";
 
 export const Sidebar = () => {
   const search = useSearch();
   const { isSidebarVisible, toggleSidebar } = useSidebar();
+  const { signOut } = useClerk();
+
+  const handleLogout = () => {
+    signOut();
+    toggleSidebar();
+  };
 
   return (
     <div
@@ -78,6 +86,12 @@ export const Sidebar = () => {
           label="Settings"
           path="/settings"
           icon={Settings}
+          toggleSidebar={toggleSidebar}
+        />
+        <SidebarItem
+          label="Log out"
+          icon={LogOut}
+          onClick={handleLogout}
           toggleSidebar={toggleSidebar}
         />
       </div>

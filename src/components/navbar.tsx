@@ -9,16 +9,18 @@ import {
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { useQuery } from "convex/react";
+import { useClerk } from "@clerk/nextjs";
 import { Skeleton } from "./ui/skeleton";
 import { Separator } from "./ui/separator";
 import { Avatar, AvatarImage } from "./ui/avatar";
 import { api } from "../../convex/_generated/api";
-import { Menu, Settings, User } from "lucide-react";
+import { LogOut, Menu, Settings, User } from "lucide-react";
 import { useSidebar } from "@/components/contexts/sidebar-context";
 
 export const Navbar = () => {
   const { toggleSidebar } = useSidebar();
   const user = useQuery(api.users.currentUser);
+  const { signOut } = useClerk();
 
   return (
     <nav className="w-full flex fixed z-40 items-center justify-between py-2.5 px-5 border-b bg-[#f9f9f9] dark:bg-[#242424]">
@@ -64,6 +66,18 @@ export const Navbar = () => {
                   <span className="text-sm">Settings</span>
                 </div>
               </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <button
+                onClick={() => {
+                  signOut();
+                }}
+              >
+                <div className="flex items-center space-x-2">
+                  <LogOut className="size-5" />
+                  <span className="text-sm">Log out</span>
+                </div>
+              </button>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

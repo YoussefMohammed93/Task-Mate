@@ -14,6 +14,7 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as http from "../http.js";
+import type * as leaderboard from "../leaderboard.js";
 import type * as pomodoro from "../pomodoro.js";
 import type * as sticky_notes from "../sticky_notes.js";
 import type * as tasks from "../tasks.js";
@@ -30,6 +31,7 @@ import type * as user_progress from "../user_progress.js";
  */
 declare const fullApi: ApiFromModules<{
   http: typeof http;
+  leaderboard: typeof leaderboard;
   pomodoro: typeof pomodoro;
   sticky_notes: typeof sticky_notes;
   tasks: typeof tasks;
