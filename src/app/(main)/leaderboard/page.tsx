@@ -14,7 +14,7 @@ import { useQuery } from "convex/react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "../../../../convex/_generated/api";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 export default function LeaderboardPage() {
   const user = useQuery(api.users.currentUser);
@@ -55,10 +55,12 @@ export default function LeaderboardPage() {
     <Card className="border-none shadow-none">
       <CardHeader className="p-0">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-2xl font-bold">Leaderboard</CardTitle>
+          <h1 className="font-mono text-3xl sm:text-4xl font-semibold">
+            Leaderboard
+          </h1>
           {!isLoading && (
             <div className="flex gap-2">
-              <Badge variant="outline">Total Users: {totalUsers}</Badge>
+              <Badge variant="outline">Total Users : {totalUsers}</Badge>
             </div>
           )}
         </div>
@@ -107,7 +109,7 @@ export default function LeaderboardPage() {
                       return (
                         <TableRow
                           key={entry.userId}
-                          className={isCurrentUser ? "bg-muted/75" : undefined}
+                          className={isCurrentUser ? "bg-muted/90" : undefined}
                         >
                           <TableCell
                             className={`font-medium ${getRankColor(index)} whitespace-nowrap`}

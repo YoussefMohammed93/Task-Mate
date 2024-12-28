@@ -7,7 +7,6 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import Link from "next/link";
-import { Button } from "./ui/button";
 import { useQuery } from "convex/react";
 import { useClerk } from "@clerk/nextjs";
 import { Skeleton } from "./ui/skeleton";
@@ -24,15 +23,8 @@ export const Navbar = () => {
 
   return (
     <nav className="w-full flex fixed z-40 items-center justify-between py-2.5 px-5 border-b bg-[#f9f9f9] dark:bg-[#242424]">
-      <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={toggleSidebar}
-          className="md:hidden"
-        >
-          <Menu className="size-6" />
-        </Button>
+      <div role="button" onClick={toggleSidebar}>
+        <Menu className="size-5" />
       </div>
       <header className="flex items-center justify-end">
         <DropdownMenu>

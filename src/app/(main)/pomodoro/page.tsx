@@ -250,7 +250,7 @@ export default function PomodoroPage() {
     totalTime > 0 ? ((totalTime - timeLeft) / totalTime) * 100 : 0;
 
   return (
-    <div className="h-[90vh] sm:h-auto flex flex-col items-center justify-center px-5">
+    <div className="h-[90vh] sm:h-auto flex flex-col items-center justify-center">
       <h1 className="flex gap-3 text-3xl sm:text-4xl font-bold font-mono mt-1">
         Pomodoro Timer
         <span>
